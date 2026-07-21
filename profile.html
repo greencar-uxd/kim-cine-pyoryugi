@@ -87,6 +87,13 @@
   .btn-ghost{background:#fff;color:var(--ink)}
   .btn-solid{background:var(--ink);color:var(--screen);border-color:var(--ink)}
   .btn-solid:disabled{opacity:.5;cursor:default}
+  .acct{background:#fff;border:1px solid var(--fog);border-radius:10px;padding:2px 12px}
+  .acct-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;font-size:14px}
+  .acct-row + .acct-row{border-top:1px solid var(--fog)}
+  .acct-row span{color:var(--caption);flex:0 0 auto}
+  .acct-row b{font-weight:600;color:var(--ink);word-break:break-all;text-align:right}
+  .sdiv{height:1px;background:var(--fog);margin:2px 0 18px}
+  .modal-ok{font-size:13px;color:#2F6B4F;min-height:18px;margin-bottom:10px;line-height:1.5}
   @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
 </head>
@@ -134,6 +141,30 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="eCancel" type="button">취소</button>
         <button class="btn-solid" id="eSave" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlaySet">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+      <h3 id="sTitle">설정</h3>
+      <label class="fld">
+        <span>계정</span>
+        <div class="acct" id="acctInfo"></div>
+      </label>
+      <div class="sdiv"></div>
+      <label class="fld">
+        <span>비밀번호 변경</span>
+        <input id="pCur" type="password" placeholder="현재 비밀번호" autocomplete="current-password">
+        <input id="pNew" type="password" placeholder="새 비밀번호 (8~72자, 영문·숫자·특수 중 2종)" autocomplete="new-password" style="margin-top:8px">
+        <input id="pNew2" type="password" placeholder="새 비밀번호 확인" autocomplete="new-password" style="margin-top:8px">
+        <em class="hint">비밀번호를 바꾸면 다른 기기에서는 다시 로그인해야 해요.</em>
+      </label>
+      <div class="modal-err" id="sErr"></div>
+      <div class="modal-ok" id="sOk"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="sCancel" type="button">닫기</button>
+        <button class="btn-solid" id="sSave" type="button">비밀번호 변경</button>
       </div>
     </div>
   </div>
@@ -216,9 +247,39 @@ $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
 $("fBio").addEventListener("input", () => { $("bioCt").textContent = ($("fBio").value || "").length; });
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
-document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeEdit(); });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); } });
 buildPicks();
-$("mSettings").onclick = () => alert("설정은 곧 열려요 🐥");
+/* ---- 설정 모달 (계정 정보 · 비밀번호 변경) ---- */
+function openSet(){
+  $("menu").classList.remove("open");
+  $("overlay").classList.remove("open");
+  const me = state.me || {};
+  const joined = (me.created_at || "").slice(0,10).replace(/-/g,".");
+  $("acctInfo").innerHTML =
+    '<div class="acct-row"><span>이메일</span><b>'+ esc(me.email || "-") +'</b></div>' +
+    '<div class="acct-row"><span>가입일</span><b>'+ esc(joined || "-") +'</b></div>';
+  $("pCur").value=""; $("pNew").value=""; $("pNew2").value="";
+  $("sErr").textContent=""; $("sOk").textContent="";
+  $("overlaySet").classList.add("open");
+}
+function closeSet(){ $("overlaySet").classList.remove("open"); }
+async function savePw(){
+  const cur=$("pCur").value, nw=$("pNew").value, nw2=$("pNew2").value;
+  $("sErr").textContent=""; $("sOk").textContent="";
+  if(!cur){ $("sErr").textContent="현재 비밀번호를 입력해주세요."; $("pCur").focus(); return; }
+  if(nw.length<8){ $("sErr").textContent="새 비밀번호는 8자 이상이어야 해요."; $("pNew").focus(); return; }
+  if(nw!==nw2){ $("sErr").textContent="새 비밀번호가 서로 달라요."; $("pNew2").focus(); return; }
+  const btn=$("sSave"); btn.disabled=true; btn.textContent="변경 중…";
+  const { status, data } = await api("/api/password", { method:"POST", body: JSON.stringify({ current:cur, next:nw }) });
+  btn.disabled=false; btn.textContent="비밀번호 변경";
+  if(status!==200 || !data.ok){ $("sErr").textContent=(data && data.error) || "변경에 실패했어요. 잠시 후 다시 시도해주세요."; return; }
+  $("sOk").textContent="비밀번호가 변경됐어요 ✓ 다른 기기는 다시 로그인해주세요.";
+  $("pCur").value=""; $("pNew").value=""; $("pNew2").value="";
+}
+$("mSettings").onclick = openSet;
+$("sCancel").onclick = closeSet;
+$("sSave").onclick = savePw;
+$("overlaySet").addEventListener("click", (e) => { if(e.target === $("overlaySet")) closeSet(); });
 $("mDelete").onclick = () => alert("회원 탈퇴는 곧 지원돼요.\n탈퇴 후 일정 기간 재가입 제한 정책이 함께 적용될 예정이에요.");
 
 function chipRow(items, mapFn){
