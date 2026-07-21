@@ -57,7 +57,37 @@
   .pcard .pt{display:block;font-size:11px;line-height:1.3;color:var(--ink);margin-top:4px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .loading{padding:80px 0;text-align:center;color:var(--caption);font-size:14px}
-  @media (max-width:480px){ .wrap{padding:0 16px 80px} }
+  /* 편집 모달 */
+  .overlay{position:fixed;inset:0;background:rgba(19,18,21,.44);display:none;
+    align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{width:min(420px,100%);background:var(--screen);border:1px solid var(--fog);border-radius:18px;
+    padding:24px 22px;max-height:90svh;overflow:auto;box-shadow:0 20px 60px rgba(19,18,21,.22)}
+  .modal h3{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:18px}
+  .fld{display:block;margin-bottom:18px}
+  .fld>span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--caption);margin-bottom:8px}
+  .fld input,.fld textarea{width:100%;font-family:var(--kr);font-size:15px;color:var(--ink);background:#fff;
+    border:1px solid var(--fog);border-radius:10px;padding:11px 12px;outline:none;-webkit-appearance:none}
+  .fld input:focus,.fld textarea:focus{border-color:var(--ink)}
+  .fld textarea{resize:none;line-height:1.6}
+  .hint{display:block;font-size:11px;color:var(--placeholder);margin-top:6px;font-style:normal}
+  .emoji-row{display:flex;align-items:center;gap:12px}
+  .emoji-preview{width:56px;height:56px;flex:0 0 56px;border-radius:50%;background:#fff;border:1px solid var(--fog);
+    display:flex;align-items:center;justify-content:center;font-size:28px}
+  .emoji-input{flex:1;min-width:0}
+  .emoji-picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .emoji-picks button{width:38px;height:38px;font-size:20px;background:#fff;border:1px solid var(--fog);
+    border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+  .emoji-picks button:hover{border-color:var(--ink)}
+  .emoji-picks button.on{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .modal-err{font-size:13px;color:#9C2B12;min-height:18px;margin-bottom:10px;line-height:1.5}
+  .modal-actions{display:flex;gap:10px}
+  .btn-ghost,.btn-solid{flex:1;font-family:var(--kr);font-size:15px;font-weight:600;border-radius:99px;
+    padding:12px;cursor:pointer;border:1px solid var(--fog)}
+  .btn-ghost{background:#fff;color:var(--ink)}
+  .btn-solid{background:var(--ink);color:var(--screen);border-color:var(--ink)}
+  .btn-solid:disabled{opacity:.5;cursor:default}
+  @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
 </head>
 <body>
@@ -79,13 +109,44 @@
     <div id="body"><div class="loading">불러오는 중…</div></div>
   </div>
 
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <h3 id="mTitle">프로필 편집</h3>
+      <label class="fld">
+        <span>아바타</span>
+        <div class="emoji-row">
+          <div class="emoji-preview" id="ePrev">🐥</div>
+          <input class="emoji-input" id="fEmoji" maxlength="8" placeholder="이모지 입력 또는 아래에서 선택">
+        </div>
+        <div class="emoji-picks" id="ePicks"></div>
+      </label>
+      <label class="fld">
+        <span>닉네임</span>
+        <input id="fNick" maxlength="16" placeholder="닉네임" autocomplete="off">
+        <em class="hint">한글·영문·숫자 2~16자</em>
+      </label>
+      <label class="fld">
+        <span>자기소개</span>
+        <textarea id="fBio" maxlength="100" rows="3" placeholder="한 줄 소개를 적어보세요"></textarea>
+        <em class="hint"><span id="bioCt">0</span> / 100</em>
+      </label>
+      <div class="modal-err" id="eErr"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="eCancel" type="button">취소</button>
+        <button class="btn-solid" id="eSave" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 const API = "https://api.kim-cine-pyoryugi.kr";
 const GENRE={28:"액션",12:"모험",16:"애니메이션",35:"코미디",80:"범죄",99:"다큐",18:"드라마",10751:"가족",14:"판타지",36:"역사",27:"공포",10402:"음악",9648:"미스터리",10749:"로맨스",878:"SF",53:"스릴러",10752:"전쟁",37:"서부"};
 const OTT={netflix:"넷플릭스",tving:"티빙",coupang:"쿠팡플레이",wavve:"웨이브",disney:"디즈니+",watcha:"왓챠",laftel:"라프텔",appletv:"Apple TV+"};
 const CHAIN={CGV:"CGV",LOTTE:"롯데시네마",MEGABOX:"메가박스",ETC:"기타"};
+const EMOJI = ["🐥","🎬","🍿","🎞️","🎟️","📽️","⭐","🌊","🚢","🧭","🌙","🔥","💫","🐳","☕","🎧","🦭","🌴"];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const state = { me:{}, pf:{}, det:{} };
 
 async function api(path, opts){
   const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
@@ -107,7 +168,56 @@ function posterNode(m){
 $("gearBtn").onclick = (e) => { e.stopPropagation(); $("menu").classList.toggle("open"); };
 document.addEventListener("click", () => $("menu").classList.remove("open"));
 $("mLogout").onclick = async () => { try{ await api("/api/logout", {method:"POST"}); }catch(e){} location.href="/auth.html?mode=login"; };
-$("mEdit").onclick = () => alert("프로필 편집은 곧 열려요 🐥");
+/* ---- 프로필 편집 모달 ---- */
+function buildPicks(){
+  const wrap = $("ePicks"); wrap.innerHTML = "";
+  EMOJI.forEach(e => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = e;
+    b.onclick = () => { $("fEmoji").value = e; syncEmoji(); };
+    wrap.appendChild(b);
+  });
+}
+function syncEmoji(){
+  const v = $("fEmoji").value.trim();
+  $("ePrev").textContent = v || "🐥";
+  [...$("ePicks").children].forEach(b => b.classList.toggle("on", b.textContent === v));
+}
+function openEdit(){
+  $("menu").classList.remove("open");
+  const me = state.me || {};
+  $("fEmoji").value = me.emoji || "";
+  $("fNick").value = me.nickname || "";
+  $("fBio").value = me.bio || "";
+  $("bioCt").textContent = ($("fBio").value || "").length;
+  $("eErr").textContent = "";
+  syncEmoji();
+  $("overlay").classList.add("open");
+  $("fNick").focus();
+}
+function closeEdit(){ $("overlay").classList.remove("open"); }
+async function saveEdit(){
+  const nickname = $("fNick").value.trim();
+  const bio = $("fBio").value;
+  const emoji = $("fEmoji").value.trim();
+  $("eErr").textContent = "";
+  if(!/^[가-힣a-zA-Z0-9_]{2,16}$/.test(nickname)){ $("eErr").textContent = "닉네임은 한글·영문·숫자 2~16자예요."; $("fNick").focus(); return; }
+  if(/\d{7,}/.test(nickname)){ $("eErr").textContent = "닉네임에 전화번호처럼 보이는 숫자열은 쓸 수 없어요."; $("fNick").focus(); return; }
+  const btn = $("eSave"); btn.disabled = true; btn.textContent = "저장 중…";
+  const { status, data } = await api("/api/profile", { method:"POST", body: JSON.stringify({ nickname, bio, emoji }) });
+  btn.disabled = false; btn.textContent = "저장";
+  if(status !== 200 || !data.ok){ $("eErr").textContent = (data && data.error) || "저장에 실패했어요. 잠시 후 다시 시도해주세요."; return; }
+  state.me = data.user || state.me;
+  render(state.me, state.pf, state.det);
+  closeEdit();
+}
+$("mEdit").onclick = openEdit;
+$("eCancel").onclick = closeEdit;
+$("eSave").onclick = saveEdit;
+$("fEmoji").addEventListener("input", syncEmoji);
+$("fBio").addEventListener("input", () => { $("bioCt").textContent = ($("fBio").value || "").length; });
+$("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeEdit(); });
+buildPicks();
 $("mSettings").onclick = () => alert("설정은 곧 열려요 🐥");
 $("mDelete").onclick = () => alert("회원 탈퇴는 곧 지원돼요.\n탈퇴 후 일정 기간 재가입 제한 정책이 함께 적용될 예정이에요.");
 
@@ -133,7 +243,7 @@ function render(me, pf, det){
   const head = document.createElement("div"); head.className="phead";
   const joined = (me.created_at||"").slice(0,7).replace("-",".");
   head.innerHTML =
-    '<div class="avatar">'+ (me.emoji || "🐥") +'</div>' +
+    '<div class="avatar">'+ esc(me.emoji || "🐥") +'</div>' +
     '<div class="nick">'+ esc(me.nickname||"선원") +'</div>' +
     (joined? '<div class="joined">'+esc(joined)+' 승선</div>':'') +
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
@@ -179,7 +289,8 @@ function render(me, pf, det){
   const pfData = (pf.data && pf.data.ok) ? pf.data : {};
   const ids = [...new Set([].concat((pfData.favorites||[]).map(f=>f.tmdb_id), (pfData.watchlist||[]).map(w=>w.tmdb_id)))];
   const det = ids.length ? await fetchDetails(ids) : {};
-  render(me.data.user || {}, pfData, det);
+  state.me = me.data.user || {}; state.pf = pfData; state.det = det;
+  render(state.me, state.pf, state.det);
 })();
 </script>
 </body>
