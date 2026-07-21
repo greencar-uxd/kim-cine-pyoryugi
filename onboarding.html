@@ -270,8 +270,9 @@ async function advance(includeData){
 function finish(){
   $("card").innerHTML =
     '<div class="done"><h1>항해 준비 완료 ⛵</h1>' +
-    '<p class="sub">취향에 맞는 영화와 근처 모임을 곧 보여드릴게요.</p>' +
-    '<a class="go" href="/">홈으로</a></div>';
+    '<p class="sub">내 프로필로 이동할게요…</p>' +
+    '<a class="go" href="/profile.html">내 프로필 보기</a></div>';
+  setTimeout(function(){ location.href = "/profile.html"; }, 1200);
 }
 
 $("nextBtn").onclick = () => advance(true);

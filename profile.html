@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>김씨네표류기 — 내 프로필</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#131215;--screen:#FAF8F4;--signal:#F4562B;--signal-text:#C7401A;--fog:#E9E5DD;--caption:#6B665D;--placeholder:#A8A29A;
+    --serif:'Noto Serif KR','Noto Serif CJK KR','Apple Myungjo',serif;
+    --kr:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    --mono:'IBM Plex Mono','SF Mono',Menlo,monospace}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--screen);color:var(--ink);font-family:var(--kr);min-height:100svh}
+  .wrap{width:min(600px,100%);margin:0 auto;padding:0 20px 96px}
+  /* 상단바 */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    background:var(--screen);padding:16px 0;border-bottom:1px solid var(--fog)}
+  .topbar .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  .gear{position:relative}
+  .gear>button{background:none;border:0;cursor:pointer;color:var(--ink);padding:8px;display:flex}
+  .gear svg{width:24px;height:24px;display:block}
+  .menu{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--fog);border-radius:12px;
+    padding:4px;min-width:160px;box-shadow:0 8px 24px rgba(19,18,21,.1);display:none}
+  .menu.open{display:block}
+  .menu button{width:100%;text-align:left;background:none;border:0;cursor:pointer;font-family:var(--kr);
+    font-size:14px;color:var(--ink);padding:12px;border-radius:8px}
+  .menu button:hover{background:var(--screen)}
+  .menu button.danger{color:#9C2B12}
+  .menu .sep{height:1px;background:var(--fog);margin:4px 0}
+  /* 프로필 헤더 */
+  .phead{text-align:center;padding:32px 0 24px}
+  .avatar{width:88px;height:88px;border-radius:50%;background:#fff;border:1px solid var(--fog);
+    display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px}
+  .nick{font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em}
+  .joined{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--placeholder);margin-top:8px}
+  .bio{font-size:14px;color:var(--caption);line-height:1.6;margin-top:12px}
+  .bio.empty{color:var(--placeholder)}
+  .stats{display:flex;justify-content:center;gap:28px;margin-top:20px}
+  .stat{text-align:center}
+  .stat b{display:block;font-family:var(--serif);font-size:20px;font-weight:700}
+  .stat span{font-size:12px;color:var(--caption)}
+  /* 섹션 공통 */
+  .sec{margin-top:32px}
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sec-h h2{font-size:12px;font-family:var(--mono);letter-spacing:.16em;color:var(--caption);font-weight:600}
+  .sec-h a{font-size:12px;color:var(--signal-text);text-decoration:none}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:14px;background:#fff;border:1px solid var(--fog);border-radius:99px;padding:8px 14px;color:var(--ink)}
+  .empty-note{font-size:13px;color:var(--placeholder);line-height:1.6}
+  .empty-note a{color:var(--signal-text);text-decoration:none}
+  /* 최애 대문 */
+  .fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .fav-slot{aspect-ratio:2/3;border-radius:10px;background:#fff;border:1px dashed var(--fog);
+    display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
+  .soonnote{font-size:12px;color:var(--placeholder);margin-top:8px}
+  .loading{padding:80px 0;text-align:center;color:var(--caption);font-size:14px}
+  @media (max-width:480px){ .wrap{padding:0 16px 80px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/">김씨네표류기</a>
+      <div class="gear">
+        <button id="gearBtn" aria-label="메뉴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <div class="menu" id="menu">
+          <button id="mEdit">프로필 편집</button>
+          <button id="mSettings">설정</button>
+          <div class="sep"></div>
+          <button id="mLogout">로그아웃</button>
+          <button id="mDelete" class="danger">회원 탈퇴</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="body"><div class="loading">불러오는 중…</div></div>
+  </div>
+
+<script>
+const API = "https://api.kim-cine-pyoryugi.kr";
+const GENRE={28:"액션",12:"모험",16:"애니메이션",35:"코미디",80:"범죄",99:"다큐",18:"드라마",10751:"가족",14:"판타지",36:"역사",27:"공포",10402:"음악",9648:"미스터리",10749:"로맨스",878:"SF",53:"스릴러",10752:"전쟁",37:"서부"};
+const OTT={netflix:"넷플릭스",tving:"티빙",coupang:"쿠팡플레이",wavve:"웨이브",disney:"디즈니+",watcha:"왓챠",laftel:"라프텔",appletv:"Apple TV+"};
+const CHAIN={CGV:"CGV",LOTTE:"롯데시네마",MEGABOX:"메가박스",ETC:"기타"};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function api(path, opts){
+  const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
+  return { status:r.status, data: await r.json().catch(()=>({})) };
+}
+
+// ⚙ 메뉴
+$("gearBtn").onclick = (e) => { e.stopPropagation(); $("menu").classList.toggle("open"); };
+document.addEventListener("click", () => $("menu").classList.remove("open"));
+$("mLogout").onclick = async () => { try{ await api("/api/logout", {method:"POST"}); }catch(e){} location.href="/auth.html?mode=login"; };
+$("mEdit").onclick = () => alert("프로필 편집은 곧 열려요 🐥");
+$("mSettings").onclick = () => alert("설정은 곧 열려요 🐥");
+$("mDelete").onclick = () => alert("회원 탈퇴는 곧 지원돼요.\n탈퇴 후 일정 기간 재가입 제한 정책이 함께 적용될 예정이에요.");
+
+function chipRow(items, mapFn){
+  if(!items || !items.length) return null;
+  const w = document.createElement("div"); w.className = "chips";
+  items.forEach(v => { const c=document.createElement("span"); c.className="chip"; c.textContent=mapFn(v); w.appendChild(c); });
+  return w;
+}
+function section(title, editHref, node, emptyHtml){
+  const s = document.createElement("div"); s.className="sec";
+  const h = document.createElement("div"); h.className="sec-h";
+  h.innerHTML = '<h2>'+esc(title)+'</h2>' + (editHref?('<a href="'+editHref+'">수정</a>'):'');
+  s.appendChild(h);
+  if(node) s.appendChild(node);
+  else { const e=document.createElement("div"); e.className="empty-note"; e.innerHTML=emptyHtml; s.appendChild(e); }
+  return s;
+}
+
+function render(me, pf){
+  const body = $("body"); body.innerHTML = "";
+
+  // 헤더
+  const head = document.createElement("div"); head.className="phead";
+  const joined = (me.created_at||"").slice(0,7).replace("-",".");
+  head.innerHTML =
+    '<div class="avatar">'+ (me.emoji || "🐥") +'</div>' +
+    '<div class="nick">'+ esc(me.nickname||"선원") +'</div>' +
+    (joined? '<div class="joined">'+esc(joined)+' 승선</div>':'') +
+    '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
+    '<div class="stats">' +
+      '<div class="stat"><b>0</b><span>본 영화</span></div>' +
+      '<div class="stat"><b>0</b><span>팔로워</span></div>' +
+      '<div class="stat"><b>0</b><span>팔로잉</span></div>' +
+    '</div>';
+  body.appendChild(head);
+
+  // 최애 영화 (v1: 자리 표시 — 곧 포스터)
+  const favCount = (pf.favorites||[]).length;
+  const favWrap = document.createElement("div");
+  const grid = document.createElement("div"); grid.className="fav-grid";
+  for(let k=0;k<3;k++){ const sl=document.createElement("div"); sl.className="fav-slot"; sl.textContent="🎬"; grid.appendChild(sl); }
+  favWrap.appendChild(grid);
+  const note = document.createElement("div"); note.className="soonnote";
+  note.textContent = favCount ? (favCount+"편 선택됨 · 곧 포스터로 보여드릴게요") : "온보딩에서 최애 영화를 골라보세요";
+  favWrap.appendChild(note);
+  body.appendChild(section("최애 영화", "/onboarding.html", favWrap, null));
+
+  // 취향
+  const g = chipRow(pf.genres, v=>GENRE[v]||("장르"+v));
+  body.appendChild(section("관심 장르", "/onboarding.html", g, '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
+  const o = chipRow(pf.providers, v=>OTT[v]||v);
+  body.appendChild(section("이용 OTT", "/onboarding.html", o, '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
+  const t = chipRow((pf.theaters||[]).map(x=>x.chain), v=>CHAIN[v]||v);
+  body.appendChild(section("자주 가는 영화관", "/onboarding.html", t, '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
+
+  // 보고싶어요 (카운트)
+  const wl = (pf.watchlist||[]).length;
+  const wlNode = document.createElement("div"); wlNode.className="empty-note";
+  wlNode.innerHTML = wl ? ('보고 싶은 영화 <b>'+wl+'편</b> · 곧 목록으로 보여드릴게요') : ('아직 없어요 · <a href="/onboarding.html">고르기</a>');
+  body.appendChild(section("보고싶어요", null, wlNode, null));
+}
+
+(async () => {
+  const me = await api("/api/me");
+  if (me.status === 401 || !me.data.ok) { location.href = "/auth.html?mode=login"; return; }
+  const pf = await api("/api/prefs");
+  render(me.data.user || {}, (pf.data && pf.data.ok) ? pf.data : {});
+})();
+</script>
+</body>
+</html>
