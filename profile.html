@@ -94,6 +94,16 @@
   .acct-row b{font-weight:600;color:var(--ink);word-break:break-all;text-align:right}
   .sdiv{height:1px;background:var(--fog);margin:2px 0 18px}
   .modal-ok{font-size:13px;color:#2F6B4F;min-height:18px;margin-bottom:10px;line-height:1.5}
+  .del-warn{background:#FFF7F4;border:1px solid #F3D9CF;border-radius:12px;padding:14px 16px;margin-bottom:18px}
+  .del-warn p{font-size:13.5px;color:var(--ink);font-weight:700;margin-bottom:8px}
+  .del-warn ul{margin:0;padding-left:18px}
+  .del-warn li{font-size:13px;line-height:1.7;color:var(--caption);margin:5px 0}
+  .del-warn li b{color:var(--signal-text)}
+  .del-agree{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:14px;cursor:pointer}
+  .del-agree input{margin-top:2px;flex:0 0 auto;width:16px;height:16px;accent-color:var(--signal)}
+  .btn-danger{flex:1;font-family:var(--kr);font-size:15px;font-weight:700;border-radius:99px;padding:12px;cursor:pointer;
+    background:#9C2B12;color:#fff;border:1px solid #9C2B12}
+  .btn-danger:disabled{opacity:.45;cursor:default}
   @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
 </head>
@@ -165,6 +175,30 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="sCancel" type="button">닫기</button>
         <button class="btn-solid" id="sSave" type="button">비밀번호 변경</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayDel">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+      <h3 id="dTitle">회원 탈퇴</h3>
+      <div class="del-warn">
+        <p>탈퇴하면 이렇게 처리돼요</p>
+        <ul>
+          <li>지금 바로 로그인·프로필이 <b>비활성화</b>되고 모든 기기에서 로그아웃돼요.</li>
+          <li><b>14일</b> 안엔 문의로 복구할 수 있고, 이후엔 프로필·취향·활동 기록이 <b>완전히 삭제</b>돼요.</li>
+          <li>탈퇴 후 <b>30일</b>은 같은 이메일로 다시 가입할 수 없어요.</li>
+        </ul>
+      </div>
+      <label class="fld">
+        <span>비밀번호 확인</span>
+        <input id="dPw" type="password" placeholder="현재 비밀번호" autocomplete="current-password">
+      </label>
+      <label class="del-agree"><input type="checkbox" id="dAgree"> 안내를 확인했고, 탈퇴에 동의해요.</label>
+      <div class="modal-err" id="dErr"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="dCancel" type="button">취소</button>
+        <button class="btn-danger" id="dConfirm" type="button" disabled>탈퇴하기</button>
       </div>
     </div>
   </div>
@@ -247,7 +281,7 @@ $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
 $("fBio").addEventListener("input", () => { $("bioCt").textContent = ($("fBio").value || "").length; });
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
-document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); } });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); } });
 buildPicks();
 /* ---- 설정 모달 (계정 정보 · 비밀번호 변경) ---- */
 function openSet(){
@@ -280,7 +314,39 @@ $("mSettings").onclick = openSet;
 $("sCancel").onclick = closeSet;
 $("sSave").onclick = savePw;
 $("overlaySet").addEventListener("click", (e) => { if(e.target === $("overlaySet")) closeSet(); });
-$("mDelete").onclick = () => alert("회원 탈퇴는 곧 지원돼요.\n탈퇴 후 일정 기간 재가입 제한 정책이 함께 적용될 예정이에요.");
+/* ---- 회원 탈퇴 모달 ---- */
+function openDel(){
+  $("menu").classList.remove("open");
+  $("overlay").classList.remove("open");
+  $("overlaySet").classList.remove("open");
+  $("dPw").value = ""; $("dAgree").checked = false; $("dConfirm").disabled = true;
+  $("dErr").textContent = "";
+  $("overlayDel").classList.add("open");
+}
+function closeDel(){ $("overlayDel").classList.remove("open"); }
+async function confirmDel(){
+  if(!$("dAgree").checked) return;
+  const pw = $("dPw").value;
+  $("dErr").textContent = "";
+  if(!pw){ $("dErr").textContent = "비밀번호를 입력해주세요."; $("dPw").focus(); return; }
+  const btn = $("dConfirm"); btn.disabled = true; btn.textContent = "처리 중…";
+  const { status, data } = await api("/api/delete-account", { method:"POST", body: JSON.stringify({ password: pw }) });
+  if(status !== 200 || !data.ok){
+    btn.disabled = false; btn.textContent = "탈퇴하기";
+    $("dErr").textContent = (data && data.error) || "탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.";
+    return;
+  }
+  const modal = $("overlayDel").querySelector(".modal");
+  modal.innerHTML = '<h3>안녕히 가세요 🐥</h3>'
+    + '<p style="font-size:14px;color:var(--caption);line-height:1.75;margin-top:10px">'
+    + '탈퇴가 접수됐어요. 14일 안엔 언제든 문의로 다시 돌아올 수 있어요.<br>그동안 함께 표류해줘서 고마웠어요.</p>';
+  setTimeout(function(){ location.href = "/"; }, 2600);
+}
+$("mDelete").onclick = openDel;
+$("dCancel").onclick = closeDel;
+$("dAgree").addEventListener("change", function(){ $("dConfirm").disabled = !this.checked; });
+$("dConfirm").onclick = confirmDel;
+$("overlayDel").addEventListener("click", (e) => { if(e.target === $("overlayDel")) closeDel(); });
 
 function chipRow(items, mapFn){
   if(!items || !items.length) return null;
