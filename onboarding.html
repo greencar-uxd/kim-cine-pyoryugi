@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>김씨네표류기 — 취향 설정</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* 타입 스케일 10·12·14·16·20·24·28 · 4px 그리드 · 브랜드 컬러 유지 */
+  :root{--ink:#131215;--screen:#FAF8F4;--signal:#F4562B;--signal-text:#C7401A;--fog:#E9E5DD;--caption:#6B665D;--placeholder:#A8A29A;
+    --serif:'Noto Serif KR','Noto Serif CJK KR','Apple Myungjo',serif;
+    --kr:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    --mono:'IBM Plex Mono','SF Mono',Menlo,monospace}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--screen);color:var(--ink);font-family:var(--kr);min-height:100svh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 16px 80px}
+  .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}
+  .card{width:min(460px,94vw);background:#fff;border:1px solid var(--fog);border-radius:16px;padding:32px 28px;margin-top:20px}
+  /* 진행률 */
+  .prog{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--caption);margin-bottom:12px}
+  .bar{height:4px;background:var(--fog);border-radius:99px;overflow:hidden;margin-bottom:24px}
+  .bar>i{display:block;height:100%;background:var(--signal);border-radius:99px;transition:width .3s ease}
+  h1{font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em;margin-bottom:8px}
+  .sub{font-size:14px;color:var(--caption);line-height:1.6;margin-bottom:24px}
+  /* 칩 */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:16px;font-family:var(--kr);color:var(--ink);background:var(--screen);border:1px solid #DDD8CD;border-radius:12px;padding:12px 16px;cursor:pointer;user-select:none;transition:border-color .12s,background .12s}
+  .chip:hover{border-color:var(--caption)}
+  .chip.sel{border-color:var(--signal);background:#FDEEE6;color:var(--signal-text);font-weight:700}
+  .allrow{margin-top:16px}
+  .linkbtn{background:none;border:0;color:var(--caption);font-size:12px;font-family:var(--kr);cursor:pointer;text-decoration:underline;text-underline-offset:2px;padding:0}
+  .linkbtn:hover{color:var(--signal-text)}
+  .soon{font-size:14px;color:var(--caption);line-height:1.7;background:var(--screen);border:1px dashed var(--fog);border-radius:12px;padding:20px;text-align:center}
+  /* 액션 */
+  .actions{display:flex;align-items:center;gap:12px;margin-top:32px}
+  .btn{flex:1;background:var(--ink);color:var(--screen);border:0;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--kr)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .back{background:none;border:1px solid #DDD8CD;color:var(--caption);border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--kr);width:64px}
+  .skip{margin-top:16px;text-align:center}
+  .msg{margin-top:16px;font-size:14px;line-height:1.6;border-radius:12px;padding:12px 16px;display:none}
+  .msg.err{display:block;background:#FBEAE4;color:#9C2B12}
+  .done h1{margin-bottom:12px}
+  .done .go{display:inline-block;margin-top:8px;background:var(--ink);color:var(--screen);text-decoration:none;border-radius:12px;padding:14px 24px;font-size:16px;font-weight:700}
+  .foot{margin-top:24px;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--caption)}
+  @media (max-width:480px){body{padding:24px 16px 64px}.card{padding:24px 20px}}
+</style>
+</head>
+<body>
+  <a class="brand" href="/">김씨네표류기</a>
+
+  <form class="card" id="card" onsubmit="return false">
+    <div class="prog"><span id="progLabel">1 / 5</span><span id="progName">영화관</span></div>
+    <div class="bar"><i id="progFill" style="width:20%"></i></div>
+    <h1 id="stepTitle">자주 가는 영화관</h1>
+    <p class="sub" id="stepSub">가까운 모임을 추천하려고 물어봐요. 여러 개 골라도 좋아요.</p>
+
+    <div id="content"></div>
+
+    <div class="msg" id="msg"></div>
+    <div class="actions">
+      <button type="button" class="back" id="backBtn" style="display:none">←</button>
+      <button type="button" class="btn" id="nextBtn">다음</button>
+    </div>
+    <div class="skip"><button type="button" class="linkbtn" id="skipBtn">이 단계 건너뛰기</button></div>
+  </form>
+
+  <div class="foot">KIM CINE PYORYUGI</div>
+
+<script>
+const API = "https://api.kim-cine-pyoryugi.kr";
+
+const STEPS = [
+  { key:"theaters",  name:"영화관",   title:"자주 가는 영화관",        sub:"가까운 모임을 추천하려고 물어봐요. 여러 개 골라도 좋아요.", type:"chips",
+    options:[{v:"CGV",t:"CGV"},{v:"LOTTE",t:"롯데시네마"},{v:"MEGABOX",t:"메가박스"},{v:"ETC",t:"기타"}] },
+  { key:"genres",    name:"장르",     title:"좋아하는 장르",           sub:"취향에 맞는 영화와 사람을 추천할게요.",              type:"soon" },
+  { key:"providers", name:"OTT",      title:"이용하는 OTT",            sub:"어디서 볼 수 있는지 맞춰서 보여줄게요.",              type:"soon" },
+  { key:"favorites", name:"최애 영화", title:"최애 영화 3편",           sub:"인생 영화로 프로필을 꾸며요.",                     type:"soon" },
+  { key:"watchlist", name:"보고싶어요", title:"지금 보고 싶은 영화 3편", sub:"현재 상영·개봉 예정 중에서 골라요.",                type:"soon" },
+];
+
+// 선택 상태 (칩 단계별 Set)
+const sel = { theaters:new Set() };
+let i = 0;
+
+const $ = (id) => document.getElementById(id);
+function showErr(t){ const m=$("msg"); m.className="msg err"; m.textContent=t; }
+function clearErr(){ const m=$("msg"); m.className="msg"; m.textContent=""; }
+
+async function api(path, opts){
+  const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
+  return { status:r.status, data: await r.json().catch(()=>({})) };
+}
+
+function render(){
+  const s = STEPS[i];
+  $("progLabel").textContent = (i+1) + " / " + STEPS.length;
+  $("progName").textContent = s.name;
+  $("progFill").style.width = Math.round((i+1)/STEPS.length*100) + "%";
+  $("stepTitle").textContent = s.title;
+  $("stepSub").textContent = s.sub;
+  $("backBtn").style.display = i>0 ? "block" : "none";
+  $("nextBtn").textContent = (i === STEPS.length-1) ? "완료" : "다음";
+  clearErr();
+
+  const c = $("content"); c.innerHTML = "";
+  if (s.type === "chips") {
+    const wrap = document.createElement("div"); wrap.className = "chips";
+    s.options.forEach(o => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip" + (sel[s.key].has(o.v) ? " sel" : ""); b.textContent = o.t;
+      b.onclick = () => { sel[s.key].has(o.v) ? sel[s.key].delete(o.v) : sel[s.key].add(o.v); render(); };
+      wrap.appendChild(b);
+    });
+    c.appendChild(wrap);
+    const all = document.createElement("div"); all.className = "allrow";
+    const ab = document.createElement("button"); ab.type="button"; ab.className="linkbtn";
+    const isAll = s.options.every(o => sel[s.key].has(o.v));
+    ab.textContent = isAll ? "전체 해제" : "전체 선택";
+    ab.onclick = () => { isAll ? sel[s.key].clear() : s.options.forEach(o=>sel[s.key].add(o.v)); render(); };
+    all.appendChild(ab); c.appendChild(all);
+  } else {
+    const d = document.createElement("div"); d.className = "soon";
+    d.textContent = "이 단계는 곧 열려요. 지금은 건너뛰고 진행해 주세요 🐥";
+    c.appendChild(d);
+  }
+}
+
+async function save(payload){
+  const { status, data } = await api("/api/prefs", { method:"POST", body: JSON.stringify(payload) });
+  if (status === 401) { location.href = "/auth.html?mode=login"; return false; }
+  if (!data.ok) { showErr(data.error || "저장에 실패했어요. 잠시 후 다시 시도해주세요."); return false; }
+  return true;
+}
+
+function payloadFor(stepIndex, includeData){
+  const s = STEPS[stepIndex];
+  const p = { step: stepIndex + 1 };
+  if (includeData && s.type === "chips") {
+    if (s.key === "theaters") p.theaters = [...sel.theaters].map(v => ({ chain:v }));
+  }
+  if (stepIndex === STEPS.length - 1) p.done = 1;
+  return p;
+}
+
+async function advance(includeData){
+  $("nextBtn").disabled = true; $("skipBtn").disabled = true;
+  const ok = await save(payloadFor(i, includeData));
+  $("nextBtn").disabled = false; $("skipBtn").disabled = false;
+  if (!ok) return;
+  if (i === STEPS.length - 1) return finish();
+  i++; render();
+}
+
+function finish(){
+  $("card").innerHTML =
+    '<div class="done"><h1>항해 준비 완료 ⛵</h1>' +
+    '<p class="sub">취향에 맞는 영화와 근처 모임을 곧 보여드릴게요.</p>' +
+    '<a class="go" href="/">홈으로</a></div>';
+}
+
+$("nextBtn").onclick = () => advance(true);
+$("skipBtn").onclick = () => advance(false);
+$("backBtn").onclick = () => { if (i>0){ i--; render(); } };
+
+// 로그인 확인 → 기존 선호 프리필 → 렌더
+(async () => {
+  const me = await api("/api/me");
+  if (me.status === 401 || !me.data.ok) { location.href = "/auth.html?mode=login"; return; }
+  const pf = await api("/api/prefs");
+  if (pf.data && pf.data.ok) {
+    (pf.data.theaters || []).forEach(t => sel.theaters.add(t.chain));
+    const step = (pf.data.onboarding && pf.data.onboarding.step) || 0;
+    if (step > 0 && step < STEPS.length) i = step; // 이어서 진행
+  }
+  render();
+})();
+</script>
+</body>
+</html>
