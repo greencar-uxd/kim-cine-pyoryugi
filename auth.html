@@ -36,6 +36,18 @@
   .emoji-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   .emoji-row button{font-size:20px;background:var(--screen);border:1px solid var(--fog);border-radius:10px;padding:6px 10px;cursor:pointer}
   .emoji-row button.sel{border-color:var(--signal);background:#FDEeE6}
+  .pwwrap{position:relative}
+  .pwwrap input{padding-right:46px}
+  .pweye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;font-size:15px;opacity:.55;padding:6px}
+  .pwrule{font-size:11.5px;color:#8B8780;margin-top:6px}
+  .pwrule .ok{color:#1E6B4F}
+  .hint{display:none;font-size:11.5px;margin-top:5px}
+  .hint.err{display:block;color:#9C2B12}
+  .agree{display:flex;gap:8px;align-items:flex-start;margin-top:20px;font-size:12.5px;color:#4A4740;line-height:1.6}
+  .agree input{width:auto;margin-top:2px}
+  .agree a{color:#C7401A}
+  .foot a{color:inherit;text-decoration:none}
+  .foot a:hover{color:#C7401A}
 </style>
 </head>
 <body>
@@ -46,7 +58,8 @@
     <h1>다시 승선하기</h1>
     <p class="sub">영화… 좋아하세요? 오늘도 어서오세요.</p>
     <label>이메일</label><input name="email" type="email" autocomplete="email" required>
-    <label>비밀번호</label><input name="password" type="password" autocomplete="current-password" required>
+    <label>비밀번호</label>
+    <div class="pwwrap"><input name="password" type="password" autocomplete="current-password" required><button type="button" class="pweye" aria-label="비밀번호 보기">👁️</button></div>
     <div class="msg" id="msg-login"></div>
     <button class="btn">로그인</button>
     <div class="links"><a href="?mode=join">처음이신가요? 이메일로 승선 신청 →</a><a href="?mode=forgot">비밀번호를 잊었어요</a></div>
@@ -56,17 +69,21 @@
   <form class="card hide" id="view-join">
     <h1>승선 신청</h1>
     <p class="sub">초대장은 따로 없어요 — 이메일이면 충분해요.<br>로그인은 이메일로, 활동은 닉네임으로!</p>
-    <label>닉네임 (활동명)</label><input name="nickname" placeholder="사이트에 표시될 이름 · 한글/영문 2~16자" autocomplete="nickname" required>
-    <label>비밀번호</label><input name="password" type="password" placeholder="8자 이상 · 다른 사이트와 다른 비번으로!" autocomplete="new-password" minlength="8" required>
+    <label>닉네임 (활동명)</label><input name="nickname" placeholder="표시될 이름 · 실명이나 전화번호는 넣지 마세요!" autocomplete="nickname" required>
+    <div class="hint" id="hint-nick"></div>
+    <label>비밀번호</label>
+    <div class="pwwrap"><input name="password" type="password" placeholder="다른 사이트와 다른 비번으로!" autocomplete="new-password" minlength="8" required><button type="button" class="pweye" aria-label="비밀번호 보기">👁️</button></div>
+    <div class="pwrule"><span data-rule="len">○ 8자 이상</span> · <span data-rule="mix">○ 영문/숫자/특수문자 2종 이상</span></div>
     <label>이메일</label><input name="email" type="email" placeholder="인증·복구 전용" autocomplete="email" required>
+    <div class="hint" id="hint-email"></div>
     <label>최애 영화 (선택)</label><input name="fav_movie" placeholder="예: 김씨 표류기">
-    <label>프로필 이모지 (선택)</label>
+    <label>프로필 이모지 (선택 · 다시 누르면 해제)</label>
     <div class="emoji-row" id="emojiRow"></div>
     <input type="hidden" name="emoji" value="🐥">
+    <label class="agree"><input type="checkbox" name="agree" required><span><a href="/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>을 확인했어요. (실명·연락처는 수집하지 않아요)</span></label>
     <div class="msg" id="msg-join"></div>
     <button class="btn">인증 메일 받기</button>
     <div class="links"><a href="?mode=login">← 이미 선원이에요</a></div>
-    <p class="privacy">저장하는 것: 닉네임, 이메일, 암호화된 비밀번호(원문은 저희도 몰라요), 선택 항목. 저장하지 않는 것: 실명·연락처·접속기록(IP). 탈퇴 시 즉시 삭제됩니다.</p>
   </form>
 
   <!-- 비밀번호 찾기 -->
@@ -93,7 +110,9 @@
   <form class="card hide" id="view-reset">
     <h1>새 비밀번호 만들기</h1>
     <p class="sub">이번엔 잊지 않을 걸로 부탁해요 🐥</p>
-    <label>새 비밀번호</label><input name="password" type="password" autocomplete="new-password" minlength="8" required>
+    <label>새 비밀번호</label>
+    <div class="pwwrap"><input name="password" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="pweye" aria-label="비밀번호 보기">👁️</button></div>
+    <div class="pwrule"><span data-rule="len">○ 8자 이상</span> · <span data-rule="mix">○ 영문/숫자/특수문자 2종 이상</span></div>
     <label>한 번 더</label><input name="password2" type="password" autocomplete="new-password" minlength="8" required>
     <div class="msg" id="msg-reset"></div>
     <button class="btn">비밀번호 변경</button>
@@ -107,7 +126,7 @@
     <div class="links" style="margin-top:22px"><a href="?mode=login">로그인하러 가기 →</a></div>
   </div>
 
-  <div class="foot">KIM CINE PYORYUGI · HELP → HELLO</div>
+  <div class="foot">KIM CINE PYORYUGI · <a href="/privacy.html">개인정보처리방침</a></div>
 
 <script>
 const API = "https://api.kim-cine-pyoryugi.kr";
@@ -123,10 +142,52 @@ if (row) EMOJIS.forEach(e => {
   const b = document.createElement("button");
   b.type = "button"; b.textContent = e;
   if (e === "🐥") b.classList.add("sel");
-  b.onclick = () => { row.querySelectorAll("button").forEach(x => x.classList.remove("sel")); b.classList.add("sel");
-    document.querySelector('#view-join input[name=emoji]').value = e; };
+  b.onclick = () => {
+    const hid = document.querySelector('#view-join input[name=emoji]');
+    if (b.classList.contains("sel")) { b.classList.remove("sel"); hid.value = ""; }
+    else { row.querySelectorAll("button").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); hid.value = e; }
+  };
   row.appendChild(b);
 });
+
+// 비밀번호 보기/숨기기
+document.querySelectorAll(".pweye").forEach(btn => btn.addEventListener("click", () => {
+  const inp = btn.parentElement.querySelector("input");
+  inp.type = inp.type === "password" ? "text" : "password";
+  btn.style.opacity = inp.type === "password" ? .55 : 1;
+}));
+
+// 실시간 검증
+const NICK_OK = /^[가-힣a-zA-Z0-9_]{2,16}$/;
+const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const pwKinds = v => [/[a-zA-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter(re => re.test(v)).length;
+function pwRuleUI(form) {
+  const pw = form.querySelector("[name=password]").value;
+  const rl = form.querySelector("[data-rule=len]"), rm = form.querySelector("[data-rule=mix]");
+  if (!rl) return true;
+  const lo = pw.length >= 8, mo = pwKinds(pw) >= 2;
+  rl.textContent = (lo ? "✓" : "○") + " 8자 이상"; rl.className = lo ? "ok" : "";
+  rm.textContent = (mo ? "✓" : "○") + " 영문/숫자/특수문자 2종 이상"; rm.className = mo ? "ok" : "";
+  return lo && mo;
+}
+function joinValid(strict) {
+  const f = document.getElementById("view-join");
+  const nick = f.querySelector("[name=nickname]").value.trim();
+  const em = f.querySelector("[name=email]").value.trim();
+  const hn = document.getElementById("hint-nick"), he = document.getElementById("hint-email");
+  let ok = true;
+  if (/\d{7,}/.test(nick)) { hn.textContent = "전화번호처럼 보이는 숫자열은 쓸 수 없어요!"; hn.className = "hint err"; ok = false; }
+  else if (!NICK_OK.test(nick)) { if (strict || nick) { hn.textContent = "한글/영문/숫자/_ 조합 2~16자로 부탁해요."; hn.className = "hint err"; } ok = false; }
+  else hn.className = "hint";
+  if (!pwRuleUI(f)) ok = false;
+  if (!EMAIL_OK.test(em)) { if (strict || em) { he.textContent = "이메일 형식을 확인해주세요."; he.className = "hint err"; } ok = false; }
+  else he.className = "hint";
+  return ok;
+}
+const joinForm = document.getElementById("view-join");
+joinForm.addEventListener("input", () => joinValid(false));
+const resetForm = document.getElementById("view-reset");
+resetForm.addEventListener("input", () => pwRuleUI(resetForm));
 
 async function call(path, body) {
   const r = await fetch(API + path, {
@@ -156,6 +217,7 @@ wire(document.getElementById("view-login"), async f => {
   else show("msg-login", false, data.error + (data.need_verify ? ' <a href="?mode=resend">인증 메일 다시 받기</a>' : ""));
 });
 wire(document.getElementById("view-join"), async f => {
+  if (!joinValid(true)) return show("msg-join", false, "빨간 안내를 먼저 확인해주세요!");
   const { data } = await call("/api/signup", f);
   if (data.ok) show("msg-join", true, `<b>${f.email}</b> 로 인증 메일을 보냈어요! 메일함(스팸함 포함)에서 버튼을 눌러 가입을 완료해주세요.`);
   else show("msg-join", false, data.error || "가입에 실패했어요.");
@@ -170,6 +232,7 @@ wire(document.getElementById("view-resend"), async f => {
 });
 wire(document.getElementById("view-reset"), async f => {
   if (f.password !== f.password2) return show("msg-reset", false, "두 비밀번호가 서로 달라요.");
+  if (f.password.length < 8 || pwKinds(f.password) < 2) return show("msg-reset", false, "비밀번호는 8자 이상, 영문·숫자·특수문자 중 2종 이상으로 부탁해요.");
   const { data } = await call("/api/reset", { token, password: f.password });
   if (data.ok) show("msg-reset", true, '변경 완료! <a href="?mode=login">로그인하러 가기 →</a>');
   else show("msg-reset", false, data.error || "변경에 실패했어요.");
