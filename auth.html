@@ -81,12 +81,11 @@
     <p class="sub">초대장은 따로 없어요 — 이메일이면 충분해요.<br>로그인은 이메일로, 활동은 닉네임으로!</p>
     <label>닉네임 (활동명)</label><input name="nickname" placeholder="표시될 이름 · 실명이나 전화번호는 넣지 마세요!" autocomplete="nickname" required>
     <div class="hint" id="hint-nick"></div>
+    <label>이메일</label><input name="email" type="email" placeholder="인증·복구 전용" autocomplete="email" required>
+    <div class="hint" id="hint-email"></div>
     <label>비밀번호</label>
     <div class="pwwrap"><input name="password" type="password" placeholder="다른 사이트와 다른 비번으로!" autocomplete="new-password" minlength="8" required><button type="button" class="pweye" aria-label="비밀번호 표시"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
     <div class="pwrule"><span data-rule="len">○ 8자 이상</span> · <span data-rule="mix">○ 영문/숫자/특수문자 2종 이상</span></div>
-    <label>이메일</label><input name="email" type="email" placeholder="인증·복구 전용" autocomplete="email" required>
-    <div class="hint" id="hint-email"></div>
-    <label>최애 영화 (선택)</label><input name="fav_movie" placeholder="예: 김씨 표류기">
     <label>프로필 이모지 (선택 · 다시 누르면 해제)</label>
     <div class="emoji-row" id="emojiRow"></div>
     <input type="hidden" name="emoji" value="🐥">
@@ -134,7 +133,7 @@
     <h1>가입 확인 중…</h1>
     <p class="sub" id="verify-status">잠시만요, 승선 서류에 도장 찍는 중입니다.</p>
     <div class="msg" id="msg-verify"></div>
-    <div class="links" style="margin-top:22px"><a href="?mode=login">로그인하러 가기 →</a></div>
+    <div class="links"><a href="?mode=login">로그인하러 가기 →</a></div>
   </div>
 
   <div class="foot">KIM CINE PYORYUGI · <a href="/privacy.html">개인정보처리방침</a></div>
