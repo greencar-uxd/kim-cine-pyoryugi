@@ -29,6 +29,7 @@
   .links{display:flex;justify-content:space-between;margin-top:20px;font-size:14px}
   .links a{color:var(--caption);text-decoration:none}
   .links a:hover{color:var(--signal-text)}
+  .links.col{flex-direction:column;align-items:flex-start;gap:14px}
   .msg{margin-top:16px;font-size:14px;line-height:1.6;border-radius:12px;padding:12px 16px;display:none}
   .msg.err{display:block;background:#FBEAE4;color:#9C2B12}
   .msg.ok{display:block;background:#E9F1EC;color:#1E6B4F}
@@ -65,14 +66,14 @@
 
   <!-- 로그인 -->
   <form class="card" id="view-login">
-    <h1>다시 승선하기</h1>
+    <h1>승선하기</h1>
     <p class="sub">영화… 좋아하세요? 오늘도 어서오세요.</p>
     <label>이메일</label><input name="email" type="email" placeholder="가입한 이메일 주소" autocomplete="email" required>
     <label>비밀번호</label>
     <div class="pwwrap"><input name="password" type="password" placeholder="비밀번호를 입력해주세요" autocomplete="current-password" required><button type="button" class="pweye" aria-label="비밀번호 표시"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
     <div class="msg" id="msg-login"></div>
     <button class="btn">로그인</button>
-    <div class="links"><a href="?mode=join">처음이신가요? 이메일로 승선 신청 →</a><a href="?mode=forgot">비밀번호를 잊었어요</a></div>
+    <div class="links col"><a href="?mode=join">처음이신가요? 이메일로 승선 신청 →</a><a href="?mode=forgot">비밀번호를 잊었어요</a></div>
   </form>
 
   <!-- 가입 -->
@@ -227,7 +228,16 @@ function wire(form, handler) {
 
 wire(document.getElementById("view-login"), async f => {
   const { status, data } = await call("/api/login", f);
-  if (data.ok) { show("msg-login", true, `어서오세요, ${data.user.emoji} <b>${data.user.nickname}</b> 님! 이동합니다…`); setTimeout(() => location.href = "/", 900); }
+  if (data.ok) {
+    show("msg-login", true, `어서오세요, ${data.user.emoji} <b>${data.user.nickname}</b> 님! 이동합니다…`);
+    let dest = "/onboarding.html";              // 온보딩 미완료 → 온보딩부터
+    try {
+      const pr = await fetch(API + "/api/prefs", { credentials: "include" });
+      const pd = await pr.json();
+      if (pd && pd.ok && pd.onboarding && pd.onboarding.done) dest = "/profile.html";  // 완료 → 프로필
+    } catch (e) {}
+    setTimeout(() => location.href = dest, 900);
+  }
   else show("msg-login", false, data.error + (data.need_verify ? ' <a href="?mode=resend">인증 메일 다시 받기</a>' : ""));
 });
 wire(document.getElementById("view-join"), async f => {
