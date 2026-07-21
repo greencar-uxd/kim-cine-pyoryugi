@@ -72,16 +72,18 @@
 const API = "https://api.kim-cine-pyoryugi.kr";
 
 const STEPS = [
-  { key:"theaters",  name:"영화관",   title:"자주 가는 영화관",        sub:"가까운 모임을 추천하려고 물어봐요. 여러 개 골라도 좋아요.", type:"chips",
+  { key:"theaters",  name:"영화관",   title:"자주 가는 영화관",        sub:"가까운 모임을 추천하려고 물어봐요. 여러 개 골라도 좋아요.", type:"chips", allowAll:true,
     options:[{v:"CGV",t:"CGV"},{v:"LOTTE",t:"롯데시네마"},{v:"MEGABOX",t:"메가박스"},{v:"ETC",t:"기타"}] },
-  { key:"genres",    name:"장르",     title:"좋아하는 장르",           sub:"취향에 맞는 영화와 사람을 추천할게요.",              type:"soon" },
-  { key:"providers", name:"OTT",      title:"이용하는 OTT",            sub:"어디서 볼 수 있는지 맞춰서 보여줄게요.",              type:"soon" },
+  { key:"genres",    name:"장르",     title:"좋아하는 장르",           sub:"3개 이상 골라주면 추천이 더 정확해져요.",           type:"chips",
+    options:[{v:28,t:"액션"},{v:12,t:"모험"},{v:16,t:"애니메이션"},{v:35,t:"코미디"},{v:80,t:"범죄"},{v:99,t:"다큐"},{v:18,t:"드라마"},{v:10751,t:"가족"},{v:14,t:"판타지"},{v:36,t:"역사"},{v:27,t:"공포"},{v:10402,t:"음악"},{v:9648,t:"미스터리"},{v:10749,t:"로맨스"},{v:878,t:"SF"},{v:53,t:"스릴러"},{v:10752,t:"전쟁"},{v:37,t:"서부"}] },
+  { key:"providers", name:"OTT",      title:"이용하는 OTT",            sub:"구독 중인 곳을 골라요. 어디서 볼 수 있는지 맞춰줄게요.", type:"chips", allowAll:true,
+    options:[{v:"netflix",t:"넷플릭스"},{v:"tving",t:"티빙"},{v:"coupang",t:"쿠팡플레이"},{v:"wavve",t:"웨이브"},{v:"disney",t:"디즈니+"},{v:"watcha",t:"왓챠"},{v:"laftel",t:"라프텔"},{v:"appletv",t:"Apple TV+"}] },
   { key:"favorites", name:"최애 영화", title:"최애 영화 3편",           sub:"인생 영화로 프로필을 꾸며요.",                     type:"soon" },
   { key:"watchlist", name:"보고싶어요", title:"지금 보고 싶은 영화 3편", sub:"현재 상영·개봉 예정 중에서 골라요.",                type:"soon" },
 ];
 
 // 선택 상태 (칩 단계별 Set)
-const sel = { theaters:new Set() };
+const sel = { theaters:new Set(), genres:new Set(), providers:new Set() };
 let i = 0;
 
 const $ = (id) => document.getElementById(id);
@@ -114,12 +116,14 @@ function render(){
       wrap.appendChild(b);
     });
     c.appendChild(wrap);
-    const all = document.createElement("div"); all.className = "allrow";
-    const ab = document.createElement("button"); ab.type="button"; ab.className="linkbtn";
-    const isAll = s.options.every(o => sel[s.key].has(o.v));
-    ab.textContent = isAll ? "전체 해제" : "전체 선택";
-    ab.onclick = () => { isAll ? sel[s.key].clear() : s.options.forEach(o=>sel[s.key].add(o.v)); render(); };
-    all.appendChild(ab); c.appendChild(all);
+    if (s.allowAll) {
+      const all = document.createElement("div"); all.className = "allrow";
+      const ab = document.createElement("button"); ab.type="button"; ab.className="linkbtn";
+      const isAll = s.options.every(o => sel[s.key].has(o.v));
+      ab.textContent = isAll ? "전체 해제" : "전체 선택";
+      ab.onclick = () => { isAll ? sel[s.key].clear() : s.options.forEach(o=>sel[s.key].add(o.v)); render(); };
+      all.appendChild(ab); c.appendChild(all);
+    }
   } else {
     const d = document.createElement("div"); d.className = "soon";
     d.textContent = "이 단계는 곧 열려요. 지금은 건너뛰고 진행해 주세요 🐥";
@@ -139,6 +143,8 @@ function payloadFor(stepIndex, includeData){
   const p = { step: stepIndex + 1 };
   if (includeData && s.type === "chips") {
     if (s.key === "theaters") p.theaters = [...sel.theaters].map(v => ({ chain:v }));
+    if (s.key === "genres") p.genres = [...sel.genres];
+    if (s.key === "providers") p.providers = [...sel.providers];
   }
   if (stepIndex === STEPS.length - 1) p.done = 1;
   return p;
@@ -171,6 +177,8 @@ $("backBtn").onclick = () => { if (i>0){ i--; render(); } };
   const pf = await api("/api/prefs");
   if (pf.data && pf.data.ok) {
     (pf.data.theaters || []).forEach(t => sel.theaters.add(t.chain));
+    (pf.data.genres || []).forEach(g => sel.genres.add(g));
+    (pf.data.providers || []).forEach(p => sel.providers.add(p));
     const step = (pf.data.onboarding && pf.data.onboarding.step) || 0;
     if (step > 0 && step < STEPS.length) i = step; // 이어서 진행
   }
