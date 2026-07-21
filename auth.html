@@ -48,6 +48,7 @@
   .pwrule .ok{color:#1E6B4F}
   .hint{display:none;font-size:12px;margin-top:4px}
   .hint.err{display:block;color:#9C2B12}
+  .hint.ok{display:block;color:#1E6B4F}
   .rule-note{margin-top:16px;font-size:12px;color:#6B665D;line-height:1.7;background:var(--screen);border:1px solid var(--fog);border-radius:12px;padding:12px}
   .rule-note b{color:#9C2B12;font-weight:600}
   .agree{display:flex;gap:8px;align-items:flex-start;margin-top:20px;font-size:12px;color:#4A4740;line-height:1.6}
@@ -172,7 +173,7 @@ document.querySelectorAll(".pweye").forEach(btn => btn.addEventListener("click",
   btn.setAttribute("aria-label", show ? "비밀번호 숨기기" : "비밀번호 표시");
 }));
 
-// 실시간 검증
+// 실시간 검증 — 타이핑 중엔 긍정(✓)만, 빨간 경고는 포커스 아웃(blur) 시에만
 const NICK_OK = /^[가-힣a-zA-Z0-9_]{2,16}$/;
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const pwKinds = v => [/[a-zA-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter(re => re.test(v)).length;
@@ -185,22 +186,39 @@ function pwRuleUI(form) {
   rm.textContent = (mo ? "✓" : "○") + " 영문/숫자/특수문자 2종 이상"; rm.className = mo ? "ok" : "";
   return lo && mo;
 }
-function joinValid(strict) {
-  const f = document.getElementById("view-join");
-  const nick = f.querySelector("[name=nickname]").value.trim();
-  const em = f.querySelector("[name=email]").value.trim();
-  const hn = document.getElementById("hint-nick"), he = document.getElementById("hint-email");
-  let ok = true;
-  if (/\d{7,}/.test(nick)) { hn.textContent = "전화번호처럼 보이는 숫자열은 쓸 수 없어요!"; hn.className = "hint err"; ok = false; }
-  else if (!NICK_OK.test(nick)) { if (strict || nick) { hn.textContent = "한글/영문/숫자/_ 조합 2~16자로 부탁해요."; hn.className = "hint err"; } ok = false; }
-  else hn.className = "hint";
-  if (!pwRuleUI(f)) ok = false;
-  if (!EMAIL_OK.test(em)) { if (strict || em) { he.textContent = "이메일 형식을 확인해주세요."; he.className = "hint err"; } ok = false; }
-  else he.className = "hint";
-  return ok;
+function nickState(v) {
+  v = (v || "").trim();
+  if (!v) return { s: "empty" };
+  if (/\d{7,}/.test(v)) return { s: "bad", msg: "전화번호처럼 보이는 숫자열은 빼주세요." };
+  if (!NICK_OK.test(v)) return { s: "bad", msg: "한글·영문·숫자 2~16자로 적어주세요." };
+  return { s: "ok", msg: "✓ 쓸 수 있는 닉네임이에요" };
+}
+function emailState(v) {
+  v = (v || "").trim();
+  if (!v) return { s: "empty" };
+  if (!EMAIL_OK.test(v)) return { s: "bad", msg: "인증 메일을 받을 이메일을 정확히 적어주세요." };
+  return { s: "ok", msg: "✓ 인증 메일을 받을 수 있어요" };
+}
+function renderHint(el, st, showRed) {
+  if (st.s === "ok") { el.textContent = st.msg; el.className = "hint ok"; }
+  else if (st.s === "bad" && showRed) { el.textContent = st.msg; el.className = "hint err"; }
+  else { el.textContent = ""; el.className = "hint"; }
 }
 const joinForm = document.getElementById("view-join");
-joinForm.addEventListener("input", () => joinValid(false));
+const nickInp = joinForm.querySelector("[name=nickname]");
+const emailInp = joinForm.querySelector("[name=email]");
+const hn = document.getElementById("hint-nick"), he = document.getElementById("hint-email");
+nickInp.addEventListener("input", () => renderHint(hn, nickState(nickInp.value), false));
+emailInp.addEventListener("input", () => renderHint(he, emailState(emailInp.value), false));
+nickInp.addEventListener("blur", () => renderHint(hn, nickState(nickInp.value), true));
+emailInp.addEventListener("blur", () => renderHint(he, emailState(emailInp.value), true));
+joinForm.addEventListener("input", () => pwRuleUI(joinForm));
+function joinValid(strict) {
+  const ns = nickState(nickInp.value), es = emailState(emailInp.value);
+  if (strict) { renderHint(hn, ns, true); renderHint(he, es, true); }
+  const pwOk = pwRuleUI(joinForm);
+  return ns.s === "ok" && es.s === "ok" && pwOk;
+}
 const resetForm = document.getElementById("view-reset");
 resetForm.addEventListener("input", () => pwRuleUI(resetForm));
 
