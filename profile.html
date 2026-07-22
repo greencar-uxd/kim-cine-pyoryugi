@@ -569,6 +569,20 @@ function section(title, editHref, node, emptyHtml){
   return s;
 }
 
+function derivedGenres(){
+  const det = state.det || {}, pf = state.pf || {};
+  const ids = [].concat(
+    (pf.favorites||[]).map(f=>f.tmdb_id),
+    (state.reviews||[]).map(r=>r.tmdb_id),
+    (pf.watchlist||[]).map(w=>w.tmdb_id)
+  );
+  const count = {};
+  ids.forEach(id => { const m = det[id]; if(m && Array.isArray(m.genres)) m.genres.forEach(g => { count[g] = (count[g]||0)+1; }); });
+  let top = Object.keys(count).map(Number).sort((a,b)=> (count[b]-count[a]) || (a-b)).slice(0,6);
+  if(!top.length) top = (pf.genres||[]);
+  return top;
+}
+
 function watchedSection(){
   const revs = state.reviews || [];
   const s = document.createElement("div"); s.className = "sec";
@@ -619,8 +633,8 @@ function render(){
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
     '<div class="stats">' +
       '<div class="stat"><b>'+ (state.reviews||[]).length +'</b><span>본 영화</span></div>' +
-      '<div class="stat"><b>0</b><span>팔로워</span></div>' +
-      '<div class="stat"><b>0</b><span>팔로잉</span></div>' +
+      '<div class="stat"><b>'+ (me.followers||0) +'</b><span>팔로워</span></div>' +
+      '<div class="stat"><b>'+ (me.following||0) +'</b><span>팔로잉</span></div>' +
     '</div>';
   body.appendChild(head);
 
@@ -639,7 +653,7 @@ function render(){
   body.appendChild(watchedSection());
 
   // 취향
-  body.appendChild(section("관심 장르", "/onboarding.html", chipRow(pf.genres, v=>GENRE[v]||("장르"+v)), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
+  body.appendChild(section("관심 장르", null, chipRow(derivedGenres(), v=>GENRE[v]||("장르"+v)), '영화를 아카이브하면 관심 장르가 자동으로 생겨요 · <a href="/onboarding.html">영화 고르기</a>'));
   body.appendChild(section("이용 OTT", "/onboarding.html", chipRow(pf.providers, v=>OTT[v]||v), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
   body.appendChild(section("자주 가는 영화관", "/onboarding.html", chipRow((pf.theaters||[]).map(x=>x.chain), v=>CHAIN[v]||v), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
 
