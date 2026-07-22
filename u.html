@@ -88,6 +88,8 @@
   .lk svg{width:23px;height:23px;display:block;stroke:var(--ink);fill:none;stroke-width:1.7;transition:transform .1s}
   .lk.on svg{fill:var(--signal);stroke:var(--signal)}
   .lk:active svg{transform:scale(.84)}
+  .lk:disabled{cursor:default;opacity:.45}
+  .cmt .cmeta button:disabled{cursor:default;opacity:.45}
   .lk .lc{font-family:var(--mono);font-size:13px;min-width:8px}
   .post-actions .cc{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;color:var(--caption)}
   .cmt-list{margin:14px 0 4px;display:flex;flex-direction:column;gap:15px;max-height:34svh;overflow:auto}
@@ -239,7 +241,7 @@ function renderPost(){
     ottHtml(state.providers[r.tmdb_id])+'</div></div>';
   html += '<div class="post-cap">'+(r.one_liner?'<div class="ol">'+esc(r.one_liner)+'</div>':'')+(r.body?'<div class="bd">'+esc(r.body)+'</div>':'')+'</div>';
   html += '<div class="post-actions">'+
-    '<button class="lk'+(d.liked_by_me?' on':'')+'" id="postLike" aria-label="좋아요">'+HEART+'<span class="lc" id="postLikeC">'+(d.like_count||0)+'</span></button>'+
+    '<button class="lk'+(d.liked_by_me?' on':'')+(r.is_mine?' mine':'')+'" id="postLike" aria-label="좋아요"'+(r.is_mine?' disabled':'')+'>'+HEART+'<span class="lc" id="postLikeC">'+(d.like_count||0)+'</span></button>'+
     '<span class="cc">💬 <span id="postCmtC">'+(d.comments||[]).length+'</span></span>'+
     '</div>';
   html += '<div class="cmt-list" id="cmtList"></div>';
@@ -266,7 +268,7 @@ function renderComments(){
       '<div class="cn">'+esc(c.nickname||"선원")+'</div>'+
       '<div class="cb">'+esc(c.body)+'</div>'+
       '<div class="cmeta"><span>'+fmtTime(c.created_at)+'</span>'+
-        '<button class="clk'+(c.liked_by_me?' on':'')+'" type="button">♥ <span>'+(c.like_count||0)+'</span></button>'+
+        '<button class="clk'+(c.liked_by_me?' on':'')+(c.is_mine?' mine':'')+'" type="button"'+(c.is_mine?' disabled':'')+'>♥ <span>'+(c.like_count||0)+'</span></button>'+
         (c.can_delete?'<button class="cdel" type="button">삭제</button>':'')+
       '</div></div>';
     el.querySelector(".clk").onclick = () => toggleCommentLike(c);
