@@ -80,6 +80,15 @@
     border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
   .emoji-picks button:hover{border-color:var(--ink)}
   .emoji-picks button.on{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .avatar{overflow:hidden}
+  .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+  .emoji-preview{overflow:hidden}
+  .emoji-preview img{width:100%;height:100%;object-fit:cover;display:block}
+  .ava-actions{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+  .ava-btn{font-family:var(--kr);font-size:13px;font-weight:600;border:1px solid var(--fog);background:#fff;color:var(--ink);border-radius:9px;padding:9px;cursor:pointer}
+  .ava-btn:hover{border-color:var(--ink)}
+  .ava-btn.danger{color:#9C2B12}
+  .ava-btn:disabled{opacity:.5;cursor:default}
   .modal-err{font-size:13px;color:#9C2B12;min-height:18px;margin-bottom:10px;line-height:1.5}
   .modal-actions{display:flex;gap:10px}
   .btn-ghost,.btn-solid{flex:1;font-family:var(--kr);font-size:15px;font-weight:600;border-radius:99px;
@@ -175,9 +184,15 @@
         <span>아바타</span>
         <div class="emoji-row">
           <div class="emoji-preview" id="ePrev">🐥</div>
-          <input class="emoji-input" id="fEmoji" maxlength="8" placeholder="이모지 입력 또는 아래에서 선택">
+          <div class="ava-actions">
+            <button type="button" class="ava-btn" id="avaPick">사진 올리기</button>
+            <button type="button" class="ava-btn danger" id="avaDel" style="display:none">사진 삭제</button>
+          </div>
+          <input type="file" id="avaFile" accept="image/*" style="display:none">
         </div>
+        <input class="emoji-input" id="fEmoji" maxlength="8" placeholder="이모지 입력 또는 아래에서 선택" style="margin-top:10px;width:100%">
         <div class="emoji-picks" id="ePicks"></div>
+        <em class="hint">사진을 올리면 이모지 대신 사진이 보여요.</em>
       </label>
       <label class="fld">
         <span>닉네임</span>
@@ -342,10 +357,60 @@ function buildPicks(){
     wrap.appendChild(b);
   });
 }
+function updateAvaPreview(){
+  const av = state.me && state.me.avatar_url;
+  if(av){ $("ePrev").innerHTML = '<img src="'+esc(av)+'" alt="">'; $("avaDel").style.display=""; }
+  else { $("ePrev").textContent = ($("fEmoji").value.trim() || "🐥"); $("avaDel").style.display="none"; }
+}
 function syncEmoji(){
   const v = $("fEmoji").value.trim();
-  $("ePrev").textContent = v || "🐥";
   [...$("ePicks").children].forEach(b => b.classList.toggle("on", b.textContent === v));
+  updateAvaPreview();
+}
+function fileToAvatarDataURL(file, size){
+  size = size || 256;
+  return new Promise((resolve, reject) => {
+    if(!/^image\//.test(file.type)) return reject(new Error("이미지 파일만 올릴 수 있어요."));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const c = document.createElement("canvas"); c.width = size; c.height = size;
+      const ctx = c.getContext("2d");
+      const s = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      resolve(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("이미지를 불러오지 못했어요.")); };
+    img.src = url;
+  });
+}
+async function onAvaFile(e){
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if(!file) return;
+  $("eErr").textContent = "";
+  let dataUrl;
+  try { dataUrl = await fileToAvatarDataURL(file); }
+  catch(err){ $("eErr").textContent = err.message || "이미지를 처리하지 못했어요."; return; }
+  const btn = $("avaPick"); btn.disabled = true; btn.textContent = "올리는 중…";
+  const { status, data } = await api("/api/avatar", { method:"POST", body: JSON.stringify({ avatar: dataUrl }) });
+  btn.disabled = false;
+  if(status !== 200 || !data.ok){ btn.textContent = (state.me && state.me.avatar_url) ? "사진 바꾸기" : "사진 올리기"; $("eErr").textContent = (data && data.error) || "사진 업로드에 실패했어요."; return; }
+  state.me.avatar_url = data.avatar_url;
+  btn.textContent = "사진 바꾸기";
+  updateAvaPreview();
+  render();
+}
+async function onAvaDelete(){
+  const btn = $("avaDel"); btn.disabled = true;
+  const { status, data } = await api("/api/avatar/delete", { method:"POST" });
+  btn.disabled = false;
+  if(status !== 200 || !data.ok){ $("eErr").textContent = (data && data.error) || "삭제에 실패했어요."; return; }
+  state.me.avatar_url = null;
+  $("avaPick").textContent = "사진 올리기";
+  updateAvaPreview();
+  render();
 }
 function openEdit(){
   $("menu").classList.remove("open");
@@ -355,6 +420,7 @@ function openEdit(){
   $("fBio").value = me.bio || "";
   $("bioCt").textContent = ($("fBio").value || "").length;
   $("eErr").textContent = "";
+  $("avaPick").textContent = (me.avatar_url ? "사진 바꾸기" : "사진 올리기");
   syncEmoji();
   $("overlay").classList.add("open");
   $("fNick").focus();
@@ -380,6 +446,9 @@ $("eCancel").onclick = closeEdit;
 $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
 $("fBio").addEventListener("input", () => { $("bioCt").textContent = ($("fBio").value || "").length; });
+$("avaPick").onclick = () => $("avaFile").click();
+$("avaFile").addEventListener("change", onAvaFile);
+$("avaDel").onclick = onAvaDelete;
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
 document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); } });
 buildPicks();
@@ -627,7 +696,7 @@ function render(){
   const head = document.createElement("div"); head.className="phead";
   const joined = (me.created_at||"").slice(0,7).replace("-",".");
   head.innerHTML =
-    '<div class="avatar">'+ esc(me.emoji || "🐥") +'</div>' +
+    (me.avatar_url ? '<div class="avatar"><img src="'+esc(me.avatar_url)+'" alt=""></div>' : '<div class="avatar">'+ esc(me.emoji || "🐥") +'</div>') +
     '<div class="nick">'+ esc(me.nickname||"선원") +'</div>' +
     (joined? '<div class="joined">'+esc(joined)+' 승선</div>':'') +
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
