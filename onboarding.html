@@ -95,7 +95,7 @@ const STEPS = [
   { key:"watchlist", name:"보고싶어요", title:"지금 보고 싶은 영화 3편", sub:"현재 상영·개봉 예정 중에서 골라요. 같이 볼 사람도 찾아줄게요.", type:"grid" },
 ];
 
-const sel = { theaters:new Set(), genres:new Set(), providers:new Set(), favorites:[], watch:new Map() };
+const sel = { theaters:new Set(), providers:new Set(), favorites:[], watch:new Map() };
 const prefillWatch = new Set();
 let gridCache = null;
 let i = 0;
@@ -250,7 +250,6 @@ function payloadFor(stepIndex, includeData){
   const p = { step: stepIndex + 1 };
   if (includeData) {
     if (s.key === "theaters")  p.theaters  = [...sel.theaters].map(v => ({ chain:v }));
-    if (s.key === "genres")    p.genres    = [...sel.genres];
     if (s.key === "providers") p.providers = [...sel.providers];
     if (s.key === "favorites") p.favorites = sel.favorites.map((m,idx) => ({ tmdb_id:m.tmdb_id, rank:idx }));
     if (s.key === "watchlist") p.watchlist = [...sel.watch.values()].map(m => ({ tmdb_id:m.tmdb_id, status:"want" }));
@@ -284,7 +283,6 @@ $("backBtn").onclick = () => { if (i>0){ i--; render(); } };
   const pf = await api("/api/prefs");
   if (pf.data && pf.data.ok) {
     (pf.data.theaters || []).forEach(t => sel.theaters.add(t.chain));
-    (pf.data.genres || []).forEach(g => sel.genres.add(g));
     (pf.data.providers || []).forEach(p => sel.providers.add(p));
     (pf.data.watchlist || []).forEach(w => prefillWatch.add(w.tmdb_id));
     const step = (pf.data.onboarding && pf.data.onboarding.step) || 0;
