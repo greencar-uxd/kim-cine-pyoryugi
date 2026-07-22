@@ -221,6 +221,7 @@
           <button id="mEdit">프로필 편집</button>
           <button id="mLikes">내 좋아요</button>
           <button id="mSettings">설정</button>
+          <button id="mAdmin" style="display:none">관리자 보드</button>
           <div class="sep"></div>
           <button id="mLogout">로그아웃</button>
           <button id="mDelete" class="danger">회원 탈퇴</button>
@@ -946,6 +947,7 @@ function render(){
     revIds.length ? fetchProviders(revIds) : Promise.resolve({}),
   ]);
   state.me = me.data.user || {}; state.pf = pfData; state.det = det; state.reviews = reviews; state.providers = providers;
+  if(state.me.is_admin){ const a=$("mAdmin"); if(a){ a.style.display=""; a.onclick=()=>location.href="/admin.html"; } }
   render();
 })();
 </script>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>김씨네표류기 — 관리자</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+<style>
+  :root{--ink:#131215;--screen:#FAF8F4;--signal:#F4562B;--signal-text:#C7401A;--fog:#E9E5DD;--caption:#6B665D;--placeholder:#A8A29A;
+    --serif:'Noto Serif KR','Noto Serif CJK KR','Apple Myungjo',serif;
+    --kr:'Pretendard Variable','Pretendard',-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    --mono:'Pretendard Variable','Pretendard',-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--screen);color:var(--ink);font-family:var(--kr);min-height:100svh}
+  .wrap{width:min(760px,100%);margin:0 auto;padding:0 20px 96px}
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;background:var(--screen);padding:16px 0;border-bottom:1px solid var(--fog)}
+  .topbar .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  .topbar .brand .adm{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#fff;background:var(--signal);border-radius:5px;padding:2px 6px;margin-left:8px;vertical-align:middle}
+  .topbar .mine{font-size:13px;color:var(--caption);text-decoration:none}
+  .topbar .mine:hover{color:var(--signal-text)}
+  .tabs{display:flex;gap:6px;margin:22px 0 4px;flex-wrap:wrap}
+  .tab{font-family:var(--kr);font-size:13.5px;font-weight:600;border:1px solid var(--fog);background:#fff;color:var(--caption);border-radius:99px;padding:8px 15px;cursor:pointer}
+  .tab.on{background:var(--ink);color:var(--screen);border-color:var(--ink)}
+  .loading{padding:80px 0;text-align:center;color:var(--caption);font-size:14px}
+  .denied{padding:64px 8px;text-align:center}
+  .denied h2{font-family:var(--serif);font-size:22px;margin-bottom:12px}
+  .denied p{font-size:14px;color:var(--caption);line-height:1.7}
+  .denied code{font-family:var(--mono);background:#fff;border:1px solid var(--fog);border-radius:6px;padding:2px 7px;font-size:13px;color:var(--signal-text)}
+  .denied a{color:var(--signal-text);text-decoration:none}
+  .sec{margin-top:18px}
+  .sec-h{font-size:12px;font-family:var(--mono);letter-spacing:.16em;color:var(--caption);font-weight:600;margin:22px 0 12px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{background:#fff;border:1px solid var(--fog);border-radius:16px;padding:18px 16px}
+  .card b{display:block;font-family:var(--serif);font-size:30px;font-weight:700;line-height:1}
+  .card span{display:block;font-size:12.5px;color:var(--caption);margin-top:8px}
+  .card.sub b{font-size:22px}
+  .card.warn b{color:var(--signal-text)}
+  .recent{background:#fff;border:1px solid var(--fog);border-radius:16px;padding:6px 16px}
+  .recent .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;font-size:14px}
+  .recent .row + .row{border-top:1px solid var(--fog)}
+  .recent .row .nk{font-weight:600}
+  .recent .row .dt{font-family:var(--mono);font-size:11px;color:var(--placeholder)}
+  .badge{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 6px;margin-left:6px;font-family:var(--kr);vertical-align:middle}
+  .badge.no{background:#FFF3EE;color:var(--signal-text);border:1px solid #F3D9CF}
+  .badge.sus{background:#F2ECFF;color:#6B44C7;border:1px solid #E0D3FA}
+  .badge.del{background:#EEE;color:#888;border:1px solid #DDD}
+  .badge.ok{background:#EAF6EF;color:#2F6B4F;border:1px solid #CDE8D9}
+  .search{width:100%;font-family:var(--kr);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--fog);border-radius:10px;padding:11px 13px;outline:none;margin-bottom:14px}
+  .search:focus{border-color:var(--ink)}
+  .mlist,.clist{display:flex;flex-direction:column;gap:10px}
+  .mrow{background:#fff;border:1px solid var(--fog);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:12px}
+  .mrow .mi{flex:1;min-width:0}
+  .mrow .mn{font-size:14.5px;font-weight:600;color:var(--ink)}
+  .mrow .me{font-family:var(--mono);font-size:11.5px;color:var(--placeholder);margin-top:3px;word-break:break-all}
+  .mrow .mm{font-size:12px;color:var(--caption);margin-top:5px}
+  .mrow .mm b{color:var(--ink);font-weight:600}
+  .act{flex:0 0 auto;font-family:var(--kr);font-size:12.5px;font-weight:600;border-radius:8px;padding:8px 12px;cursor:pointer;border:1px solid var(--fog);background:#fff;color:var(--ink)}
+  .act.danger{color:#9C2B12;border-color:#F3D9CF}
+  .act.restore{color:#2F6B4F;border-color:#CDE8D9}
+  .act:disabled{opacity:.5;cursor:default}
+  .confirm{display:inline-flex;gap:6px;align-items:center}
+  .confirm span{font-size:12px;color:var(--caption)}
+  .subtoggle{display:flex;gap:6px;margin-bottom:14px}
+  .crow{background:#fff;border:1px solid var(--fog);border-radius:14px;padding:13px 15px}
+  .crow .ch{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .crow .cby{font-size:13px;color:var(--caption)}
+  .crow .cby b{color:var(--ink);font-weight:600}
+  .crow .cdt{font-family:var(--mono);font-size:11px;color:var(--placeholder)}
+  .crow .cmv{font-size:12.5px;color:var(--signal-text);margin-top:8px;font-weight:600}
+  .crow .col{font-size:14.5px;color:var(--ink);line-height:1.5;margin-top:5px}
+  .crow .cbd{font-size:13px;color:var(--caption);line-height:1.55;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .crow .cst{font-family:var(--mono);font-size:11px;color:var(--placeholder);margin-top:8px}
+  .crow .ctext{font-size:14px;color:var(--ink);line-height:1.55}
+  .crow .cfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+  .bars{background:#fff;border:1px solid var(--fog);border-radius:16px;padding:14px 16px}
+  .bar{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:12px}
+  .bar .bd{font-family:var(--mono);color:var(--caption);flex:0 0 66px}
+  .bar .bt{flex:1;background:var(--fog);border-radius:5px;height:16px;overflow:hidden}
+  .bar .bf{height:100%;background:var(--signal);border-radius:5px;min-width:2px}
+  .bar .bn{font-family:var(--mono);color:var(--ink);flex:0 0 24px;text-align:right}
+  .empty-note{font-size:13.5px;color:var(--placeholder);padding:24px 2px;line-height:1.6}
+  @media (max-width:560px){ .cards{grid-template-columns:repeat(2,1fr)} .wrap{padding:0 16px 80px} }
+</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/">김씨네표류기<span class="adm">ADMIN</span></a>
+      <a class="mine" href="/profile.html">← 내 프로필</a>
+    </div>
+    <div id="tabsWrap" style="display:none">
+      <div class="tabs">
+        <button class="tab on" data-t="dash" type="button">대시보드</button>
+        <button class="tab" data-t="members" type="button">회원</button>
+        <button class="tab" data-t="content" type="button">콘텐츠</button>
+        <button class="tab" data-t="signup" type="button">가입·초대</button>
+      </div>
+    </div>
+    <div id="body"><div class="loading">불러오는 중…</div></div>
+  </div>
+
+<script>
+const API = "https://api.kim-cine-pyoryugi.kr";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const state = { tab:"dash", overview:null, members:[], content:null, det:{}, csub:"reviews", busy:false, mq:"" };
+
+async function api(path, opts){
+  const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
+  return { status:r.status, data: await r.json().catch(()=>({})) };
+}
+async function fetchDetails(ids){ if(!ids.length) return {}; const {data}=await api("/api/movies/details?ids="+ids.join(",")); const m={}; (data.results||[]).forEach(x=>m[x.tmdb_id]=x); return m; }
+const fdate = (ts) => String(ts||"").slice(0,10).replace(/-/g,".");
+function badges(m){
+  let b="";
+  if(m.deleted) b+='<span class="badge del">탈퇴</span>';
+  if(m.suspended) b+='<span class="badge sus">정지</span>';
+  if(!m.verified && !m.deleted) b+='<span class="badge no">미인증</span>';
+  return b;
+}
+
+function setTab(t){
+  state.tab=t;
+  [...document.querySelectorAll(".tab")].forEach(el=>el.classList.toggle("on", el.dataset.t===t));
+  if(t==="dash") renderDash();
+  else if(t==="members") renderMembers();
+  else if(t==="content") renderContent();
+  else if(t==="signup") renderSignup();
+}
+
+/* ---- 대시보드 ---- */
+function renderDash(){
+  const o = state.overview || {}, c = o.counts || {};
+  let html = '<div class="cards">';
+  html += card(c.users, "활성 회원");
+  html += card(c.reviews, "리뷰(한줄평)");
+  html += card(c.comments, "댓글");
+  html += card(c.likes, "좋아요");
+  html += card(c.follows, "팔로우");
+  html += card(c.unverified, "미인증", "sub warn");
+  html += '</div>';
+  html += '<div class="sec-h">최근 가입</div>';
+  const rc = o.recent || [];
+  if(!rc.length){ html += '<div class="empty-note">아직 가입한 선원이 없어요.</div>'; }
+  else {
+    html += '<div class="recent">';
+    rc.forEach(u => { html += '<div class="row"><div><span class="nk">'+esc(u.nickname)+'</span>'+(u.verified?'':'<span class="badge no">미인증</span>')+'</div><span class="dt">'+fdate(u.created_at)+'</span></div>'; });
+    html += '</div>';
+  }
+  $("body").innerHTML = html;
+}
+function card(n, label, cls){ return '<div class="card '+(cls||"")+'"><b>'+(n==null?"–":n)+'</b><span>'+esc(label)+'</span></div>'; }
+
+/* ---- 회원 ---- */
+async function loadMembers(){
+  const { status, data } = await api("/api/admin/members" + (state.mq?("?q="+encodeURIComponent(state.mq)):""));
+  if(status===200 && data.ok){ state.members = data.members||[]; }
+  renderMembers();
+}
+function renderMembers(){
+  let html = '<input class="search" id="mSearch" placeholder="닉네임 검색…" value="'+esc(state.mq)+'">';
+  const ms = state.members || [];
+  if(!ms.length){ html += '<div class="empty-note">'+(state.mq?"검색 결과가 없어요.":"아직 회원이 없어요.")+'</div>'; }
+  else {
+    html += '<div class="mlist">';
+    ms.forEach(m => {
+      const canAct = !m.deleted;
+      const actBtn = m.suspended
+        ? '<button class="act restore" data-act="restore" data-id="'+m.id+'">복구</button>'
+        : (canAct ? '<button class="act danger" data-act="suspend" data-id="'+m.id+'">정지</button>' : '');
+      html += '<div class="mrow" id="m'+m.id+'"><div class="mi">'+
+        '<div class="mn">'+esc(m.nickname)+badges(m)+'</div>'+
+        '<div class="me">'+esc(m.email)+'</div>'+
+        '<div class="mm">가입 '+fdate(m.created_at)+' · 리뷰 <b>'+m.reviews+'</b> · 팔로워 <b>'+m.followers+'</b></div>'+
+      '</div><div class="actwrap">'+actBtn+'</div></div>';
+    });
+    html += '</div>';
+  }
+  $("body").innerHTML = html;
+  const s = $("mSearch");
+  s.oninput = () => { state.mq = s.value.trim(); clearTimeout(state._mt); state._mt = setTimeout(loadMembers, 350); };
+  s.onkeydown = (e) => { if(e.key==="Enter"){ clearTimeout(state._mt); state.mq=s.value.trim(); loadMembers(); } };
+  document.querySelectorAll("[data-act]").forEach(btn => {
+    btn.onclick = () => memberAction(btn, btn.dataset.act, parseInt(btn.dataset.id,10));
+  });
+}
+function memberAction(btn, act, id){
+  const wrap = btn.parentNode;
+  const label = act==="suspend" ? "정지" : "복구";
+  wrap.innerHTML = '<span class="confirm"><span>'+label+'할까요?</span><button class="act '+(act==="suspend"?"danger":"restore")+'" id="cy">예</button><button class="act" id="cn">아니오</button></span>';
+  $("cn").onclick = () => renderMembers();
+  $("cy").onclick = async () => {
+    if(state.busy) return; state.busy=true; $("cy").disabled=true;
+    const { status, data } = await api("/api/admin/member/"+act, { method:"POST", body: JSON.stringify({ id }) });
+    state.busy=false;
+    if(status===200 && data.ok){
+      const m = state.members.find(x=>x.id===id); if(m) m.suspended = !!data.suspended;
+      renderMembers();
+    } else { alert((data&&data.error)||"처리에 실패했어요."); state.busy=false; renderMembers(); }
+  };
+}
+
+/* ---- 콘텐츠 모더레이션 ---- */
+async function loadContent(){
+  const { status, data } = await api("/api/admin/content");
+  if(status===200 && data.ok){
+    state.content = { reviews: data.reviews||[], comments: data.comments||[] };
+    const ids = [...new Set(state.content.reviews.map(r=>r.tmdb_id))];
+    if(ids.length){ const det = await fetchDetails(ids); Object.assign(state.det, det); }
+  }
+  renderContent();
+}
+function renderContent(){
+  const c = state.content || { reviews:[], comments:[] };
+  let html = '<div class="subtoggle">'+
+    '<button class="tab '+(state.csub==="reviews"?"on":"")+'" data-sub="reviews" type="button">리뷰 '+(c.reviews.length||0)+'</button>'+
+    '<button class="tab '+(state.csub==="comments"?"on":"")+'" data-sub="comments" type="button">댓글 '+(c.comments.length||0)+'</button>'+
+  '</div>';
+  if(state.csub==="reviews"){
+    const rs = c.reviews||[];
+    if(!rs.length){ html += '<div class="empty-note">아직 리뷰가 없어요.</div>'; }
+    else { html += '<div class="clist">'; rs.forEach(r => {
+      const m = state.det[r.tmdb_id] || {};
+      const title = m.title || ("영화 #"+r.tmdb_id);
+      html += '<div class="crow" id="r'+r.id+'">'+
+        '<div class="ch"><div class="cby"><b>'+esc(r.nickname)+'</b></div><span class="cdt">'+fdate(r.created_at)+'</span></div>'+
+        '<div class="cmv">'+esc(title)+' · ★'+(r.rating/2).toFixed(1)+'</div>'+
+        (r.one_liner?'<div class="col">'+esc(r.one_liner)+'</div>':'')+
+        (r.body?'<div class="cbd">'+esc(r.body)+'</div>':'')+
+        '<div class="cfoot"><span class="cst">♥ '+(r.like_count||0)+' · 💬 '+(r.comment_count||0)+'</span><button class="act danger" data-del="review" data-id="'+r.id+'">삭제</button></div>'+
+      '</div>';
+    }); html += '</div>'; }
+  } else {
+    const cs = c.comments||[];
+    if(!cs.length){ html += '<div class="empty-note">아직 댓글이 없어요.</div>'; }
+    else { html += '<div class="clist">'; cs.forEach(cm => {
+      html += '<div class="crow" id="c'+cm.id+'">'+
+        '<div class="ch"><div class="cby"><b>'+esc(cm.nickname)+'</b> 님</div><span class="cdt">'+fdate(cm.created_at)+'</span></div>'+
+        '<div class="ctext" style="margin-top:6px">'+esc(cm.body)+'</div>'+
+        '<div class="cfoot"><span class="cst">리뷰 #'+cm.review_id+'</span><button class="act danger" data-del="comment" data-id="'+cm.id+'">삭제</button></div>'+
+      '</div>';
+    }); html += '</div>'; }
+  }
+  $("body").innerHTML = html;
+  document.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => { state.csub=b.dataset.sub; renderContent(); });
+  document.querySelectorAll("[data-del]").forEach(b => b.onclick = () => delContent(b, b.dataset.del, parseInt(b.dataset.id,10)));
+}
+function delContent(btn, kind, id){
+  const foot = btn.parentNode;
+  foot.innerHTML = '<span class="confirm"><span>삭제할까요? 되돌릴 수 없어요.</span><button class="act danger" id="dy">삭제</button><button class="act" id="dn">취소</button></span>';
+  $("dn").onclick = () => renderContent();
+  $("dy").onclick = async () => {
+    if(state.busy) return; state.busy=true; $("dy").disabled=true;
+    const { status, data } = await api("/api/admin/"+kind+"/delete", { method:"POST", body: JSON.stringify({ id }) });
+    state.busy=false;
+    if(status===200 && data.ok){
+      if(kind==="review") state.content.reviews = state.content.reviews.filter(x=>x.id!==id);
+      else state.content.comments = state.content.comments.filter(x=>x.id!==id);
+      renderContent();
+    } else { alert((data&&data.error)||"삭제에 실패했어요."); renderContent(); }
+  };
+}
+
+/* ---- 가입·초대 현황 ---- */
+function renderSignup(){
+  const o = state.overview || {}, c = o.counts || {};
+  let html = '<div class="cards">';
+  html += card((c.users||0)-(c.unverified||0), "인증 완료", "sub ok");
+  html += card(c.unverified, "미인증", "sub warn");
+  html += card(c.suspended, "정지", "sub");
+  html += card(c.deleted, "탈퇴", "sub");
+  html += '</div>';
+  html += '<div class="sec-h">가입 추이 (최근 14일 · KST)</div>';
+  const tr = (o.trend || []).slice().reverse();
+  if(!tr.length){ html += '<div class="empty-note">가입 데이터가 아직 없어요.</div>'; }
+  else {
+    const max = Math.max.apply(null, tr.map(x=>x.n).concat([1]));
+    html += '<div class="bars">';
+    tr.forEach(x => { const w = Math.round((x.n/max)*100); html += '<div class="bar"><span class="bd">'+esc(String(x.d).slice(5))+'</span><span class="bt"><span class="bf" style="width:'+w+'%"></span></span><span class="bn">'+x.n+'</span></div>'; });
+    html += '</div>';
+  }
+  $("body").innerHTML = html;
+}
+
+/* ---- init ---- */
+(async () => {
+  const me = await api("/api/me");
+  if(me.status===401 || !me.data.ok){ location.href="/auth.html?mode=login"; return; }
+  const ov = await api("/api/admin/overview");
+  if(ov.status===403){
+    $("body").innerHTML = '<div class="denied"><h2>관리자 전용 페이지예요</h2>'+
+      '<p>이 계정은 관리자 권한이 없어요.<br>Cloudflare 워커 설정에서 <code>ADMIN_NICKS</code> 환경변수에<br>관리자 닉네임을 등록해야 접근할 수 있어요.</p>'+
+      '<p style="margin-top:16px"><a href="/profile.html">← 내 프로필로</a></p></div>';
+    return;
+  }
+  if(ov.status!==200 || !ov.data.ok){ $("body").innerHTML='<div class="denied"><p>불러오지 못했어요. 잠시 후 다시 시도해주세요.</p></div>'; return; }
+  state.overview = ov.data;
+  $("tabsWrap").style.display = "";
+  document.querySelectorAll(".tab[data-t]").forEach(b => b.onclick = () => setTab(b.dataset.t));
+  renderDash();
+  // 회원·콘텐츠는 탭 진입 시 lazy 로드
+  document.querySelector('.tab[data-t="members"]').addEventListener("click", () => { if(!state.members.length) loadMembers(); }, { once:true });
+  document.querySelector('.tab[data-t="content"]').addEventListener("click", () => { if(!state.content) loadContent(); }, { once:true });
+})();
+</script>
+</body>
+</html>
