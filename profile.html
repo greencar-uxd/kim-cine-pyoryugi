@@ -104,6 +104,47 @@
   .btn-danger{flex:1;font-family:var(--kr);font-size:15px;font-weight:700;border-radius:99px;padding:12px;cursor:pointer;
     background:#9C2B12;color:#fff;border:1px solid #9C2B12}
   .btn-danger:disabled{opacity:.45;cursor:default}
+  /* 본 영화 / 리뷰 */
+  .sec-h .add{font-family:var(--kr);font-size:12.5px;color:var(--signal-text);background:none;border:0;cursor:pointer;padding:0}
+  .watched{display:flex;flex-direction:column;gap:12px}
+  .wm{display:flex;gap:12px;background:#fff;border:1px solid var(--fog);border-radius:14px;padding:12px;cursor:pointer;text-align:left;width:100%;font-family:var(--kr)}
+  .wm:hover{border-color:var(--ink)}
+  .wm-poster{width:52px;flex:0 0 52px}
+  .wm-poster img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:7px;background:var(--fog);display:block}
+  .wm-poster .noimg{width:100%;aspect-ratio:2/3;border-radius:7px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:18px}
+  .wm-main{flex:1;min-width:0}
+  .wm-title{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.35}
+  .wm-title .yr{color:var(--placeholder);font-weight:400;font-size:12.5px;margin-left:4px}
+  .wm-ol{font-size:13px;color:var(--caption);line-height:1.5;margin-top:5px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .stars{--p:0%;display:inline-block;font-size:14px;letter-spacing:1px;line-height:1;
+    background:linear-gradient(90deg,var(--signal) var(--p),#D9D4CA var(--p));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .stars::before{content:"★★★★★"}
+  .wm-rate{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .wm-rate .rn{font-family:var(--mono);font-size:11px;color:var(--caption)}
+  .ott-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .ott-badge{font-size:11px;font-weight:600;color:var(--ink);background:var(--screen);
+    border:1px solid var(--fog);border-radius:6px;padding:3px 7px;line-height:1.2}
+  .ott-none{font-size:11px;color:var(--placeholder);margin-top:8px}
+  /* 별점 입력 */
+  .star-row{display:flex;align-items:center;gap:14px}
+  .star-pick{position:relative;display:inline-block}
+  .star-pick .stars{font-size:34px;letter-spacing:5px}
+  .star-zones{position:absolute;inset:0;display:flex}
+  .star-zones span{flex:1;cursor:pointer}
+  .star-num{font-family:var(--mono);font-size:15px;color:var(--ink);min-width:30px}
+  .rev-movie{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--fog);line-height:1.4}
+  .rev-movie .yr{color:var(--placeholder);font-weight:400;font-size:13px;margin-left:5px}
+  /* 검색 모달 */
+  .srch-list{max-height:46svh;overflow:auto;margin-bottom:14px}
+  .srch-empty{font-size:13px;color:var(--placeholder);padding:16px 2px}
+  .srch-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;width:100%;background:none;border:0;text-align:left;font-family:var(--kr)}
+  .srch-item:hover{background:#fff}
+  .srch-item img,.srch-item .noimg{width:38px;flex:0 0 38px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;background:var(--fog)}
+  .srch-item .noimg{display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:14px}
+  .srch-item .si-t{font-size:14px;color:var(--ink);line-height:1.3}
+  .srch-item .si-y{font-size:12px;color:var(--placeholder)}
   @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -205,6 +246,53 @@
     </div>
   </div>
 
+  <div class="overlay" id="overlayRev">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+      <h3 id="rTitle">영화 기록</h3>
+      <div class="rev-movie" id="revMovie"></div>
+      <label class="fld">
+        <span>별점</span>
+        <div class="star-row">
+          <div class="star-pick">
+            <div class="stars" id="starFill"></div>
+            <div class="star-zones" id="starZones"></div>
+          </div>
+          <b class="star-num" id="starNum">–</b>
+        </div>
+        <em class="hint">별을 눌러 0.5점 단위로 매길 수 있어요.</em>
+      </label>
+      <label class="fld">
+        <span>한줄평</span>
+        <input id="rOne" maxlength="100" placeholder="이 영화를 한 문장으로 남긴다면?" autocomplete="off">
+        <em class="hint"><span id="rOneCt">0</span> / 100</em>
+      </label>
+      <label class="fld">
+        <span>후기 <em style="color:var(--placeholder);font-style:normal">(선택)</em></span>
+        <textarea id="rBody" maxlength="2000" rows="4" placeholder="더 남기고 싶은 감상이 있다면 자유롭게 적어주세요"></textarea>
+        <em class="hint"><span id="rBodyCt">0</span> / 2000</em>
+      </label>
+      <div class="modal-err" id="rErr"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="rDelete" type="button" style="display:none;flex:0 0 auto;color:#9C2B12">삭제</button>
+        <button class="btn-ghost" id="rCancel" type="button">취소</button>
+        <button class="btn-solid" id="rSave" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlaySrch">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="scTitle">
+      <h3 id="scTitle">영화 찾기</h3>
+      <label class="fld">
+        <input id="scInput" placeholder="본 영화 제목을 검색하세요" autocomplete="off">
+      </label>
+      <div class="srch-list" id="scList"><div class="srch-empty">제목을 입력하면 검색돼요.</div></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="scCancel" type="button">닫기</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 const API = "https://api.kim-cine-pyoryugi.kr";
 const GENRE={28:"액션",12:"모험",16:"애니메이션",35:"코미디",80:"범죄",99:"다큐",18:"드라마",10751:"가족",14:"판타지",36:"역사",27:"공포",10402:"음악",9648:"미스터리",10749:"로맨스",878:"SF",53:"스릴러",10752:"전쟁",37:"서부"};
@@ -213,7 +301,7 @@ const CHAIN={CGV:"CGV",LOTTE:"롯데시네마",MEGABOX:"메가박스",ETC:"기�
 const EMOJI = ["🐥","🎬","🍿","🎞️","🎟️","📽️","⭐","🌊","🚢","🧭","🌙","🔥","💫","🐳","☕","🎧","🦭","🌴"];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const state = { me:{}, pf:{}, det:{} };
+const state = { me:{}, pf:{}, det:{}, reviews:[], providers:{}, rt:null };
 
 async function api(path, opts){
   const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
@@ -230,6 +318,16 @@ function posterNode(m){
   d.innerHTML = (poster ? ('<img loading="lazy" src="'+esc(poster)+'" alt="">') : '<div class="noimg">🎬</div>')
     + '<span class="pt">'+ esc(m && m.title || "") +'</span>';
   return d;
+}
+async function fetchProviders(ids){
+  if(!ids.length) return {};
+  const { data } = await api("/api/movies/providers?ids=" + ids.join(","));
+  return (data && data.providers) || {};
+}
+function starsHtml(rating){ const p = Math.max(0, Math.min(10, rating||0)) * 10; return '<span class="stars" style="--p:'+p+'%"></span>'; }
+function ottHtml(slugs){
+  if(!slugs || !slugs.length) return '<div class="ott-none">OTT 정보 없음</div>';
+  return '<div class="ott-row">' + slugs.map(s => '<span class="ott-badge">'+ esc(OTT[s]||s) +'</span>').join('') + '</div>';
 }
 
 $("gearBtn").onclick = (e) => { e.stopPropagation(); $("menu").classList.toggle("open"); };
@@ -274,7 +372,7 @@ async function saveEdit(){
   btn.disabled = false; btn.textContent = "저장";
   if(status !== 200 || !data.ok){ $("eErr").textContent = (data && data.error) || "저장에 실패했어요. 잠시 후 다시 시도해주세요."; return; }
   state.me = data.user || state.me;
-  render(state.me, state.pf, state.det);
+  render();
   closeEdit();
 }
 $("mEdit").onclick = openEdit;
@@ -283,7 +381,7 @@ $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
 $("fBio").addEventListener("input", () => { $("bioCt").textContent = ($("fBio").value || "").length; });
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
-document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); } });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); } });
 buildPicks();
 /* ---- 설정 모달 (계정 정보 · 비밀번호 변경) ---- */
 function openSet(){
@@ -350,6 +448,111 @@ $("dAgree").addEventListener("change", function(){ $("dConfirm").disabled = !thi
 $("dConfirm").onclick = confirmDel;
 $("overlayDel").addEventListener("click", (e) => { if(e.target === $("overlayDel")) closeDel(); });
 
+/* ---- 리뷰(본 영화) 모달 ---- */
+let curRating = 0;
+function paintStars(v){
+  v = Math.max(0, Math.min(10, v||0));
+  $("starFill").style.setProperty("--p", (v*10) + "%");
+  $("starNum").textContent = v ? (v/2).toFixed(1) : "–";
+}
+function buildStarZones(){
+  const z = $("starZones"); z.innerHTML = "";
+  for(let k=1;k<=10;k++){
+    const sp = document.createElement("span"); sp.dataset.v = k;
+    sp.addEventListener("mouseenter", () => paintStars(k));
+    sp.addEventListener("click", () => { curRating = k; paintStars(k); });
+    z.appendChild(sp);
+  }
+  z.addEventListener("mouseleave", () => paintStars(curRating));
+}
+function openReview(movie, existing){
+  state.rt = movie;
+  $("menu").classList.remove("open");
+  $("overlaySrch").classList.remove("open");
+  $("revMovie").innerHTML = esc(movie.title||"") + (movie.year ? '<span class="yr">'+esc(movie.year)+'</span>' : '');
+  curRating = existing ? (existing.rating||0) : 0;
+  paintStars(curRating);
+  $("rOne").value = existing ? (existing.one_liner||"") : "";
+  $("rBody").value = existing ? (existing.body||"") : "";
+  $("rOneCt").textContent = $("rOne").value.length;
+  $("rBodyCt").textContent = $("rBody").value.length;
+  $("rErr").textContent = "";
+  $("rDelete").style.display = existing ? "block" : "none";
+  $("rTitle").textContent = existing ? "리뷰 편집" : "영화 기록";
+  $("overlayRev").classList.add("open");
+}
+function closeReview(){ $("overlayRev").classList.remove("open"); state.rt = null; }
+async function saveReview(){
+  if(!state.rt) return;
+  const one = $("rOne").value.trim();
+  const body = $("rBody").value.trim();
+  $("rErr").textContent = "";
+  if(!curRating){ $("rErr").textContent = "별점을 매겨주세요."; return; }
+  if(!one){ $("rErr").textContent = "한줄평을 남겨주세요."; $("rOne").focus(); return; }
+  const tmdb_id = state.rt.tmdb_id;
+  const btn = $("rSave"); btn.disabled = true; btn.textContent = "저장 중…";
+  const { status, data } = await api("/api/reviews", { method:"POST", body: JSON.stringify({ tmdb_id, rating: curRating, one_liner: one, body }) });
+  btn.disabled = false; btn.textContent = "저장";
+  if(status !== 200 || !data.ok){ $("rErr").textContent = (data && data.error) || "저장에 실패했어요. 잠시 후 다시 시도해주세요."; return; }
+  const rv = data.review || { tmdb_id, rating: curRating, one_liner: one, body };
+  state.reviews = [rv].concat((state.reviews||[]).filter(x => x.tmdb_id !== tmdb_id));
+  if(state.pf && state.pf.watchlist) state.pf.watchlist = state.pf.watchlist.filter(w => w.tmdb_id !== tmdb_id);
+  if(!state.det[tmdb_id]){ const d = await fetchDetails([tmdb_id]); Object.assign(state.det, d); }
+  const pv = await fetchProviders([tmdb_id]); Object.assign(state.providers, pv);
+  render();
+  closeReview();
+}
+async function deleteReview(){
+  if(!state.rt) return;
+  const tmdb_id = state.rt.tmdb_id;
+  const btn = $("rDelete"); btn.disabled = true;
+  const { status, data } = await api("/api/reviews/delete", { method:"POST", body: JSON.stringify({ tmdb_id }) });
+  btn.disabled = false;
+  if(status !== 200 || !data.ok){ $("rErr").textContent = (data && data.error) || "삭제에 실패했어요."; return; }
+  state.reviews = (state.reviews||[]).filter(x => x.tmdb_id !== tmdb_id);
+  render();
+  closeReview();
+}
+$("rCancel").onclick = closeReview;
+$("rSave").onclick = saveReview;
+$("rDelete").onclick = deleteReview;
+$("rOne").addEventListener("input", () => $("rOneCt").textContent = $("rOne").value.length);
+$("rBody").addEventListener("input", () => $("rBodyCt").textContent = $("rBody").value.length);
+$("overlayRev").addEventListener("click", (e) => { if(e.target === $("overlayRev")) closeReview(); });
+buildStarZones();
+
+/* ---- 영화 검색 모달 (본 영화 기록용) ---- */
+let scTimer = null;
+function openSearch(){
+  $("menu").classList.remove("open");
+  $("scInput").value = "";
+  $("scList").innerHTML = '<div class="srch-empty">제목을 입력하면 검색돼요.</div>';
+  $("overlaySrch").classList.add("open");
+  setTimeout(() => $("scInput").focus(), 50);
+}
+function closeSearch(){ $("overlaySrch").classList.remove("open"); }
+async function runSearch(){
+  const q = $("scInput").value.trim();
+  if(!q){ $("scList").innerHTML = '<div class="srch-empty">제목을 입력하면 검색돼요.</div>'; return; }
+  $("scList").innerHTML = '<div class="srch-empty">검색 중…</div>';
+  const { data } = await api("/api/movies/search?q=" + encodeURIComponent(q));
+  const results = (data && data.results) || [];
+  if(!results.length){ $("scList").innerHTML = '<div class="srch-empty">검색 결과가 없어요.</div>'; return; }
+  $("scList").innerHTML = "";
+  results.slice(0,12).forEach(m => {
+    const it = document.createElement("button"); it.type = "button"; it.className = "srch-item";
+    const poster = (m.poster ? m.poster.replace("/w342","/w92") : "");
+    it.innerHTML = (poster ? '<img src="'+esc(poster)+'" alt="">' : '<div class="noimg">🎬</div>') +
+      '<div><div class="si-t">'+ esc(m.title||"") +'</div><div class="si-y">'+ esc(m.year||"") +'</div></div>';
+    it.onclick = () => openReview({ tmdb_id: m.tmdb_id, title: m.title, year: m.year, poster: m.poster }, null);
+    $("scList").appendChild(it);
+  });
+}
+$("scCancel").onclick = closeSearch;
+$("scInput").addEventListener("input", () => { clearTimeout(scTimer); scTimer = setTimeout(runSearch, 350); });
+$("scInput").addEventListener("keydown", (e) => { if(e.key === "Enter"){ clearTimeout(scTimer); runSearch(); } });
+$("overlaySrch").addEventListener("click", (e) => { if(e.target === $("overlaySrch")) closeSearch(); });
+
 function chipRow(items, mapFn){
   if(!items || !items.length) return null;
   const w = document.createElement("div"); w.className = "chips";
@@ -366,7 +569,45 @@ function section(title, editHref, node, emptyHtml){
   return s;
 }
 
-function render(me, pf, det){
+function watchedSection(){
+  const revs = state.reviews || [];
+  const s = document.createElement("div"); s.className = "sec";
+  const h = document.createElement("div"); h.className = "sec-h";
+  h.innerHTML = '<h2>본 영화</h2>';
+  const add = document.createElement("button"); add.className = "add"; add.type = "button"; add.textContent = "＋ 기록";
+  add.onclick = openSearch; h.appendChild(add);
+  s.appendChild(h);
+  if(!revs.length){
+    const e = document.createElement("div"); e.className = "empty-note";
+    e.append("아직 기록한 영화가 없어요 · ");
+    const a = document.createElement("a"); a.href = "#"; a.textContent = "첫 영화 기록하기";
+    a.onclick = (ev) => { ev.preventDefault(); openSearch(); };
+    e.appendChild(a); s.appendChild(e);
+    return s;
+  }
+  const list = document.createElement("div"); list.className = "watched";
+  revs.forEach(r => {
+    const m = state.det[r.tmdb_id] || {};
+    const title = m.title || ("영화 #" + r.tmdb_id);
+    const poster = m.poster ? m.poster.replace("/w342","/w185") : "";
+    const card = document.createElement("button"); card.type = "button"; card.className = "wm";
+    card.innerHTML =
+      '<div class="wm-poster">' + (poster ? '<img loading="lazy" src="'+esc(poster)+'" alt="">' : '<div class="noimg">🎬</div>') + '</div>' +
+      '<div class="wm-main">' +
+        '<div class="wm-title">' + esc(title) + (m.year ? '<span class="yr">'+esc(m.year)+'</span>' : '') + '</div>' +
+        '<div class="wm-rate">' + starsHtml(r.rating) + '<span class="rn">' + (r.rating/2).toFixed(1) + '</span></div>' +
+        (r.one_liner ? '<div class="wm-ol">' + esc(r.one_liner) + '</div>' : '') +
+        ottHtml(state.providers[r.tmdb_id]) +
+      '</div>';
+    card.onclick = () => openReview({ tmdb_id: r.tmdb_id, title: title, year: m.year, poster: m.poster }, r);
+    list.appendChild(card);
+  });
+  s.appendChild(list);
+  return s;
+}
+
+function render(){
+  const me = state.me || {}, pf = state.pf || {}, det = state.det || {};
   const body = $("body"); body.innerHTML = "";
 
   const head = document.createElement("div"); head.className="phead";
@@ -377,7 +618,7 @@ function render(me, pf, det){
     (joined? '<div class="joined">'+esc(joined)+' 승선</div>':'') +
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
     '<div class="stats">' +
-      '<div class="stat"><b>0</b><span>본 영화</span></div>' +
+      '<div class="stat"><b>'+ (state.reviews||[]).length +'</b><span>본 영화</span></div>' +
       '<div class="stat"><b>0</b><span>팔로워</span></div>' +
       '<div class="stat"><b>0</b><span>팔로잉</span></div>' +
     '</div>';
@@ -394,19 +635,30 @@ function render(me, pf, det){
   }
   body.appendChild(section("최애 영화", "/onboarding.html", favNode, '아직 없어요 · <a href="/onboarding.html">고르기</a>'));
 
+  // 본 영화 (한줄평·후기·OTT)
+  body.appendChild(watchedSection());
+
   // 취향
   body.appendChild(section("관심 장르", "/onboarding.html", chipRow(pf.genres, v=>GENRE[v]||("장르"+v)), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
   body.appendChild(section("이용 OTT", "/onboarding.html", chipRow(pf.providers, v=>OTT[v]||v), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
   body.appendChild(section("자주 가는 영화관", "/onboarding.html", chipRow((pf.theaters||[]).map(x=>x.chain), v=>CHAIN[v]||v), '아직 설정 안 함 · <a href="/onboarding.html">고르기</a>'));
 
-  // 보고싶어요 (포스터 스트립)
+  // 보고싶어요 (포스터 스트립 · 누르면 '봤어요' 기록)
   const watchIds = (pf.watchlist||[]).map(w=>w.tmdb_id);
   let wlNode = null;
   if(watchIds.length){
     wlNode = document.createElement("div");
     const strip = document.createElement("div"); strip.className="pstrip";
-    watchIds.slice(0,12).forEach(id => strip.appendChild(posterNode(det[id])));
-    wlNode.appendChild(strip);
+    watchIds.slice(0,12).forEach(id => {
+      const m = det[id] || {};
+      const p = posterNode(m);
+      p.style.cursor = "pointer"; p.title = "봤어요 · 기록하기";
+      p.onclick = () => openReview({ tmdb_id: id, title: (m.title||("영화 #"+id)), year: m.year, poster: m.poster }, null);
+      strip.appendChild(p);
+    });
+    const hint = document.createElement("div"); hint.className="empty-note"; hint.style.marginTop="8px";
+    hint.textContent = "포스터를 누르면 '봤어요'로 기록할 수 있어요.";
+    wlNode.appendChild(strip); wlNode.appendChild(hint);
   }
   body.appendChild(section("보고싶어요", null, wlNode, '아직 없어요 · <a href="/onboarding.html">고르기</a>'));
 }
@@ -414,12 +666,17 @@ function render(me, pf, det){
 (async () => {
   const me = await api("/api/me");
   if (me.status === 401 || !me.data.ok) { location.href = "/auth.html?mode=login"; return; }
-  const pf = await api("/api/prefs");
+  const [pf, rv] = await Promise.all([ api("/api/prefs"), api("/api/reviews") ]);
   const pfData = (pf.data && pf.data.ok) ? pf.data : {};
-  const ids = [...new Set([].concat((pfData.favorites||[]).map(f=>f.tmdb_id), (pfData.watchlist||[]).map(w=>w.tmdb_id)))];
-  const det = ids.length ? await fetchDetails(ids) : {};
-  state.me = me.data.user || {}; state.pf = pfData; state.det = det;
-  render(state.me, state.pf, state.det);
+  const reviews = (rv.data && rv.data.ok) ? (rv.data.reviews || []) : [];
+  const revIds = reviews.map(r => r.tmdb_id);
+  const ids = [...new Set([].concat((pfData.favorites||[]).map(f=>f.tmdb_id), (pfData.watchlist||[]).map(w=>w.tmdb_id), revIds))];
+  const [det, providers] = await Promise.all([
+    ids.length ? fetchDetails(ids) : Promise.resolve({}),
+    revIds.length ? fetchProviders(revIds) : Promise.resolve({}),
+  ]);
+  state.me = me.data.user || {}; state.pf = pfData; state.det = det; state.reviews = reviews; state.providers = providers;
+  render();
 })();
 </script>
 </body>
