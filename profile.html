@@ -154,6 +154,59 @@
   .srch-item .noimg{display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:14px}
   .srch-item .si-t{font-size:14px;color:var(--ink);line-height:1.3}
   .srch-item .si-y{font-size:12px;color:var(--placeholder)}
+  /* 본 영화 포스터 그리드 */
+  .watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .wg{position:relative;cursor:pointer;background:none;border:0;padding:0;font-family:var(--kr);display:block}
+  .wg img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--fog);display:block}
+  .wg .noimg{width:100%;aspect-ratio:2/3;border-radius:10px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
+  .wg .wg-rate{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(19,18,21,.72);color:#fff;border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:10.5px;font-weight:600}
+  .wg .wg-rate .st{color:var(--signal);font-size:10px}
+  .wg .wg-eng{position:absolute;right:6px;top:6px;display:flex;gap:4px}
+  .wg .wg-eng span{background:rgba(19,18,21,.66);color:#fff;border-radius:6px;padding:1px 5px;font-family:var(--mono);font-size:10px}
+  /* 게시물 상세 (인스타식) */
+  .post-modal{width:min(460px,100%)}
+  .post-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .post-head .pa{width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:#fff;border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;font-size:19px;overflow:hidden}
+  .post-head .pa img{width:100%;height:100%;object-fit:cover}
+  .post-head .pn{font-weight:600;font-size:15px;color:var(--ink)}
+  .post-head .px{margin-left:auto;background:none;border:0;cursor:pointer;color:var(--caption);font-size:24px;line-height:1;padding:2px 4px}
+  .post-hero{display:flex;gap:14px;margin-bottom:14px}
+  .post-hero .hp{width:104px;flex:0 0 104px}
+  .post-hero .hp img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--fog);display:block}
+  .post-hero .hp .noimg{width:100%;aspect-ratio:2/3;border-radius:10px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
+  .post-hero .hm{flex:1;min-width:0}
+  .post-hero .hm .ht{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.35}
+  .post-hero .hm .ht .yr{color:var(--placeholder);font-weight:400;font-size:13px;margin-left:5px}
+  .post-hero .hm .hr{display:flex;align-items:center;gap:7px;margin-top:8px}
+  .post-hero .hm .hr .rn{font-family:var(--mono);font-size:12px;color:var(--caption)}
+  .post-cap{font-size:14.5px;color:var(--ink);line-height:1.6;margin-bottom:6px}
+  .post-cap .ol{font-weight:600}
+  .post-cap .bd{color:var(--caption);margin-top:6px;white-space:pre-wrap}
+  .post-actions{display:flex;align-items:center;gap:10px;padding:12px 0;margin-top:8px;border-top:1px solid var(--fog);border-bottom:1px solid var(--fog)}
+  .lk{display:inline-flex;align-items:center;gap:6px;background:none;border:0;cursor:pointer;font-family:var(--kr);color:var(--ink);padding:2px}
+  .lk svg{width:23px;height:23px;display:block;stroke:var(--ink);fill:none;stroke-width:1.7;transition:transform .1s}
+  .lk.on svg{fill:var(--signal);stroke:var(--signal)}
+  .lk:active svg{transform:scale(.84)}
+  .lk .lc{font-family:var(--mono);font-size:13px;min-width:8px}
+  .post-actions .cc{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;color:var(--caption)}
+  .post-actions .edit{margin-left:auto;font-size:13px;color:var(--signal-text);background:none;border:0;cursor:pointer;font-family:var(--kr)}
+  .cmt-list{margin:14px 0 4px;display:flex;flex-direction:column;gap:15px;max-height:34svh;overflow:auto}
+  .cmt{display:flex;gap:10px}
+  .cmt .ca{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:#fff;border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden}
+  .cmt .ca img{width:100%;height:100%;object-fit:cover}
+  .cmt .cmain{flex:1;min-width:0}
+  .cmt .cn{font-weight:600;font-size:13px;color:var(--ink)}
+  .cmt .cb{font-size:13.5px;color:var(--ink);line-height:1.5;margin-top:2px;word-break:break-word}
+  .cmt .cmeta{display:flex;align-items:center;gap:14px;margin-top:5px;font-size:11px;color:var(--placeholder)}
+  .cmt .cmeta button{background:none;border:0;cursor:pointer;font-size:11px;color:var(--placeholder);font-family:var(--kr);padding:0}
+  .cmt .cmeta button.clk.on{color:var(--signal-text);font-weight:600}
+  .cmt-empty{font-size:13px;color:var(--placeholder);padding:6px 0}
+  .cmt-err{font-size:12px;color:#9C2B12;min-height:0;margin-top:8px}
+  .cmt-add{display:flex;gap:8px;align-items:flex-end;margin-top:12px;border-top:1px solid var(--fog);padding-top:14px}
+  .cmt-add textarea{flex:1;font-family:var(--kr);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--fog);border-radius:10px;padding:9px 11px;outline:none;resize:none;line-height:1.5;max-height:100px}
+  .cmt-add textarea:focus{border-color:var(--ink)}
+  .cmt-add button{flex:0 0 auto;font-family:var(--kr);font-size:14px;font-weight:600;background:var(--ink);color:var(--screen);border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+  .cmt-add button:disabled{opacity:.4;cursor:default}
   @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -166,6 +219,7 @@
         <button id="gearBtn" aria-label="메뉴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
         <div class="menu" id="menu">
           <button id="mEdit">프로필 편집</button>
+          <button id="mLikes">내 좋아요</button>
           <button id="mSettings">설정</button>
           <div class="sep"></div>
           <button id="mLogout">로그아웃</button>
@@ -308,6 +362,12 @@
     </div>
   </div>
 
+  <div class="overlay" id="overlayPost">
+    <div class="modal post-modal" role="dialog" aria-modal="true">
+      <div id="postBody"><div class="loading" style="padding:40px 0">불러오는 중…</div></div>
+    </div>
+  </div>
+
 <script>
 const API = "https://api.kim-cine-pyoryugi.kr";
 const GENRE={28:"액션",12:"모험",16:"애니메이션",35:"코미디",80:"범죄",99:"다큐",18:"드라마",10751:"가족",14:"판타지",36:"역사",27:"공포",10402:"음악",9648:"미스터리",10749:"로맨스",878:"SF",53:"스릴러",10752:"전쟁",37:"서부"};
@@ -442,6 +502,7 @@ async function saveEdit(){
   closeEdit();
 }
 $("mEdit").onclick = openEdit;
+$("mLikes").onclick = () => location.href = "/likes.html";
 $("eCancel").onclick = closeEdit;
 $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
@@ -450,7 +511,7 @@ $("avaPick").onclick = () => $("avaFile").click();
 $("avaFile").addEventListener("change", onAvaFile);
 $("avaDel").onclick = onAvaDelete;
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
-document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); } });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); closePost(); } });
 buildPicks();
 /* ---- 설정 모달 (계정 정보 · 비밀번호 변경) ---- */
 function openSet(){
@@ -668,26 +729,152 @@ function watchedSection(){
     e.appendChild(a); s.appendChild(e);
     return s;
   }
-  const list = document.createElement("div"); list.className = "watched";
+  const grid = document.createElement("div"); grid.className = "watch-grid";
   revs.forEach(r => {
     const m = state.det[r.tmdb_id] || {};
     const title = m.title || ("영화 #" + r.tmdb_id);
-    const poster = m.poster ? m.poster.replace("/w342","/w185") : "";
-    const card = document.createElement("button"); card.type = "button"; card.className = "wm";
-    card.innerHTML =
-      '<div class="wm-poster">' + (poster ? '<img loading="lazy" src="'+esc(poster)+'" alt="">' : '<div class="noimg">🎬</div>') + '</div>' +
-      '<div class="wm-main">' +
-        '<div class="wm-title">' + esc(title) + (m.year ? '<span class="yr">'+esc(m.year)+'</span>' : '') + '</div>' +
-        '<div class="wm-rate">' + starsHtml(r.rating) + '<span class="rn">' + (r.rating/2).toFixed(1) + '</span></div>' +
-        (r.one_liner ? '<div class="wm-ol">' + esc(r.one_liner) + '</div>' : '') +
-        ottHtml(state.providers[r.tmdb_id]) +
-      '</div>';
-    card.onclick = () => openReview({ tmdb_id: r.tmdb_id, title: title, year: m.year, poster: m.poster }, r);
-    list.appendChild(card);
+    const poster = m.poster || "";
+    const cell = document.createElement("button"); cell.type = "button"; cell.className = "wg"; cell.title = title;
+    const eng = [];
+    if(r.like_count) eng.push('<span>♥ ' + r.like_count + '</span>');
+    if(r.comment_count) eng.push('<span>💬 ' + r.comment_count + '</span>');
+    cell.innerHTML =
+      (poster ? '<img loading="lazy" src="'+esc(poster)+'" alt="'+esc(title)+'">' : '<div class="noimg">🎬</div>') +
+      (eng.length ? '<div class="wg-eng">' + eng.join('') + '</div>' : '') +
+      '<div class="wg-rate"><span class="st">★</span>' + (r.rating/2).toFixed(1) + '</div>';
+    cell.onclick = () => openPost(r.id);
+    grid.appendChild(cell);
   });
-  s.appendChild(list);
+  s.appendChild(grid);
   return s;
 }
+
+/* ---- 게시물 상세 (인스타식: 좋아요·댓글) ---- */
+const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-10.1-9.3C.3 8.4 2 4.8 5.4 4.8c2 0 3.4 1.2 4.3 2.5l.3.4.3-.4c.9-1.3 2.3-2.5 4.3-2.5 3.4 0 5.1 3.6 3.5 6.9C19.6 16.3 12 21 12 21z"/></svg>';
+function fmtTime(ts){
+  if(!ts) return "";
+  const t = Date.parse(String(ts).replace(" ","T")+"Z"); if(isNaN(t)) return "";
+  const diff = (Date.now()-t)/1000;
+  if(diff<60) return "방금";
+  if(diff<3600) return Math.floor(diff/60)+"분 전";
+  if(diff<86400) return Math.floor(diff/3600)+"시간 전";
+  if(diff<2592000) return Math.floor(diff/86400)+"일 전";
+  return String(ts).slice(0,10).replace(/-/g,".");
+}
+const post = { id:null, data:null, busy:false };
+async function openPost(reviewId){
+  post.id = reviewId; post.data = null;
+  $("menu").classList.remove("open");
+  $("postBody").innerHTML = '<div class="loading" style="padding:40px 0">불러오는 중…</div>';
+  $("overlayPost").classList.add("open");
+  const { status, data } = await api("/api/review?id=" + encodeURIComponent(reviewId));
+  if(status !== 200 || !data.ok){ $("postBody").innerHTML = '<div class="loading" style="padding:40px 0">'+esc((data&&data.error)||"불러오지 못했어요.")+'</div>'; return; }
+  post.data = data;
+  const tid = data.review.tmdb_id;
+  if(!state.det[tid]){ const d = await fetchDetails([tid]); Object.assign(state.det, d); }
+  if(!state.providers[tid]){ const pv = await fetchProviders([tid]); Object.assign(state.providers, pv); }
+  renderPost();
+}
+function closePost(){ $("overlayPost").classList.remove("open"); post.id=null; post.data=null; }
+function renderPost(){
+  const d = post.data; if(!d) return;
+  const r = d.review, a = r.author || {}, m = state.det[r.tmdb_id] || {};
+  const title = m.title || ("영화 #"+r.tmdb_id);
+  const poster = m.poster || "";
+  const av = a.avatar_url ? '<img src="'+esc(a.avatar_url)+'" alt="">' : esc(a.emoji||"🐥");
+  let html = '';
+  html += '<div class="post-head"><div class="pa">'+av+'</div><div class="pn">'+esc(a.nickname||"선원")+'</div><button class="px" id="postX" aria-label="닫기">×</button></div>';
+  html += '<div class="post-hero"><div class="hp">'+(poster?'<img src="'+esc(poster)+'" alt="">':'<div class="noimg">🎬</div>')+'</div>'+
+    '<div class="hm"><div class="ht">'+esc(title)+(m.year?'<span class="yr">'+esc(m.year)+'</span>':'')+'</div>'+
+    '<div class="hr">'+starsHtml(r.rating)+'<span class="rn">'+(r.rating/2).toFixed(1)+'</span></div>'+
+    ottHtml(state.providers[r.tmdb_id])+'</div></div>';
+  html += '<div class="post-cap">'+(r.one_liner?'<div class="ol">'+esc(r.one_liner)+'</div>':'')+(r.body?'<div class="bd">'+esc(r.body)+'</div>':'')+'</div>';
+  html += '<div class="post-actions">'+
+    '<button class="lk'+(d.liked_by_me?' on':'')+'" id="postLike" aria-label="좋아요">'+HEART+'<span class="lc" id="postLikeC">'+(d.like_count||0)+'</span></button>'+
+    '<span class="cc">💬 <span id="postCmtC">'+(d.comments||[]).length+'</span></span>'+
+    (r.is_mine?'<button class="edit" id="postEdit" type="button">편집</button>':'')+
+    '</div>';
+  html += '<div class="cmt-list" id="cmtList"></div>';
+  html += '<div class="cmt-err" id="cmtErr"></div>';
+  html += '<div class="cmt-add"><textarea id="cmtInput" rows="1" maxlength="500" placeholder="댓글 달기…"></textarea><button id="cmtSend" type="button">등록</button></div>';
+  $("postBody").innerHTML = html;
+  $("postX").onclick = closePost;
+  $("postLike").onclick = togglePostLike;
+  if(r.is_mine){ const pe=$("postEdit"); if(pe) pe.onclick = () => { closePost(); openReview({ tmdb_id:r.tmdb_id, title:title, year:m.year, poster:m.poster }, { rating:r.rating, one_liner:r.one_liner, body:r.body }); }; }
+  $("cmtSend").onclick = sendComment;
+  const ta = $("cmtInput");
+  ta.addEventListener("input", () => { ta.style.height="auto"; ta.style.height=Math.min(100, ta.scrollHeight)+"px"; $("cmtErr").textContent=""; });
+  ta.addEventListener("keydown", (e) => { if(e.key==="Enter" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); sendComment(); } });
+  renderComments();
+}
+function renderComments(){
+  const list = $("cmtList"); if(!list) return;
+  const cs = (post.data && post.data.comments) || [];
+  if(!cs.length){ list.innerHTML = '<div class="cmt-empty">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</div>'; return; }
+  list.innerHTML = "";
+  cs.forEach(c => {
+    const av = c.avatar_url ? '<img src="'+esc(c.avatar_url)+'" alt="">' : esc(c.emoji||"🐥");
+    const el = document.createElement("div"); el.className = "cmt";
+    el.innerHTML = '<div class="ca">'+av+'</div><div class="cmain">'+
+      '<div class="cn">'+esc(c.nickname||"선원")+'</div>'+
+      '<div class="cb">'+esc(c.body)+'</div>'+
+      '<div class="cmeta"><span>'+fmtTime(c.created_at)+'</span>'+
+        '<button class="clk'+(c.liked_by_me?' on':'')+'" type="button">♥ <span>'+(c.like_count||0)+'</span></button>'+
+        (c.can_delete?'<button class="cdel" type="button">삭제</button>':'')+
+      '</div></div>';
+    el.querySelector(".clk").onclick = () => toggleCommentLike(c);
+    const del = el.querySelector(".cdel"); if(del) del.onclick = () => removeComment(c);
+    list.appendChild(el);
+  });
+}
+async function togglePostLike(){
+  if(post.busy || !post.data) return; post.busy = true;
+  const d = post.data; const want = !d.liked_by_me;
+  const { status, data } = await api(want?"/api/like":"/api/unlike", { method:"POST", body: JSON.stringify({ type:"review", id: d.review.id }) });
+  post.busy = false;
+  if(status===200 && data.ok){
+    d.liked_by_me = data.liked; d.like_count = data.count;
+    const btn=$("postLike"), c=$("postLikeC"); if(btn) btn.classList.toggle("on", data.liked); if(c) c.textContent = data.count;
+    const rv = (state.reviews||[]).find(x=>x.id===d.review.id); if(rv) rv.like_count = data.count;
+  }
+}
+async function toggleCommentLike(c){
+  if(post.busy) return; post.busy = true;
+  const want = !c.liked_by_me;
+  const { status, data } = await api(want?"/api/like":"/api/unlike", { method:"POST", body: JSON.stringify({ type:"comment", id: c.id }) });
+  post.busy = false;
+  if(status===200 && data.ok){ c.liked_by_me = data.liked; c.like_count = data.count; renderComments(); }
+}
+async function sendComment(){
+  if(post.busy || !post.data) return;
+  const ta = $("cmtInput"); const body = (ta.value||"").trim();
+  if(!body){ return; }
+  post.busy = true; const btn = $("cmtSend"); btn.disabled = true;
+  const { status, data } = await api("/api/comments", { method:"POST", body: JSON.stringify({ review_id: post.data.review.id, body }) });
+  post.busy = false; btn.disabled = false;
+  if(status===200 && data.ok && data.comment){
+    post.data.comments.push(data.comment);
+    ta.value = ""; ta.style.height = "auto";
+    $("postCmtC").textContent = post.data.comments.length;
+    const rv = (state.reviews||[]).find(x=>x.id===post.data.review.id); if(rv) rv.comment_count = (rv.comment_count||0)+1;
+    renderComments();
+    const list=$("cmtList"); if(list) list.scrollTop = list.scrollHeight;
+  } else {
+    $("cmtErr").textContent = (data && data.error) || "댓글 등록에 실패했어요.";
+  }
+}
+async function removeComment(c){
+  if(post.busy) return; post.busy = true;
+  const { status, data } = await api("/api/comments/delete", { method:"POST", body: JSON.stringify({ id: c.id }) });
+  post.busy = false;
+  if(status===200 && data.ok){
+    post.data.comments = (post.data.comments||[]).filter(x=>x.id!==c.id);
+    const cc=$("postCmtC"); if(cc) cc.textContent = post.data.comments.length;
+    const rv = (state.reviews||[]).find(x=>x.id===post.data.review.id); if(rv) rv.comment_count = Math.max(0,(rv.comment_count||1)-1);
+    renderComments();
+  }
+}
+$("overlayPost").addEventListener("click", (e) => { if(e.target === $("overlayPost")) closePost(); });
 
 function render(){
   const me = state.me || {}, pf = state.pf || {}, det = state.det || {};

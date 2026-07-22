@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>김씨네표류기 — 선원 프로필</title>
+<title>김씨네표류기 — 내 좋아요</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
 <style>
@@ -18,50 +18,32 @@
   .topbar .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
   .topbar .mine{font-size:13px;color:var(--caption);text-decoration:none}
   .topbar .mine:hover{color:var(--signal-text)}
-  .phead{text-align:center;padding:32px 0 24px}
-  .avatar{width:88px;height:88px;border-radius:50%;background:#fff;border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px;overflow:hidden}
-  .avatar img{width:100%;height:100%;object-fit:cover}
-  .nick{font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em}
-  .joined{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--placeholder);margin-top:8px}
-  .bio{font-size:14px;color:var(--caption);line-height:1.6;margin-top:12px}
-  .bio.empty{color:var(--placeholder)}
-  .stats{display:flex;justify-content:center;gap:28px;margin-top:20px}
-  .stat{text-align:center}
-  .stat b{display:block;font-family:var(--serif);font-size:20px;font-weight:700}
-  .stat span{font-size:12px;color:var(--caption)}
-  .followbar{margin-top:22px;display:flex;justify-content:center}
-  .btn-follow{font-family:var(--kr);font-size:15px;font-weight:600;border-radius:99px;padding:11px 32px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--screen)}
-  .btn-follow.on{background:#fff;color:var(--ink)}
-  .btn-follow:disabled{opacity:.5;cursor:default}
-  .sec{margin-top:32px}
-  .sec-h h2{font-size:12px;font-family:var(--mono);letter-spacing:.16em;color:var(--caption);font-weight:600;margin-bottom:12px}
-  .empty-note{font-size:13px;color:var(--placeholder);line-height:1.6}
-  .watched{display:flex;flex-direction:column;gap:12px}
-  .wm{display:flex;gap:12px;background:#fff;border:1px solid var(--fog);border-radius:14px;padding:12px}
-  .wm-poster{width:52px;flex:0 0 52px}
-  .wm-poster img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:7px;background:var(--fog);display:block}
-  .wm-poster .noimg{width:100%;aspect-ratio:2/3;border-radius:7px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:18px}
-  .wm-main{flex:1;min-width:0}
-  .wm-title{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.35}
-  .wm-title .yr{color:var(--placeholder);font-weight:400;font-size:12.5px;margin-left:4px}
-  .wm-ol{font-size:13px;color:var(--caption);line-height:1.5;margin-top:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-  .stars{--p:0%;display:inline-block;font-size:14px;letter-spacing:1px;line-height:1;background:linear-gradient(90deg,var(--signal) var(--p),#D9D4CA var(--p));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .stars::before{content:"★★★★★"}
-  .wm-rate{display:flex;align-items:center;gap:6px;margin-top:6px}
-  .wm-rate .rn{font-family:var(--mono);font-size:11px;color:var(--caption)}
-  .ott-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-  .ott-badge{font-size:11px;font-weight:600;color:var(--ink);background:var(--screen);border:1px solid var(--fog);border-radius:6px;padding:3px 7px;line-height:1.2}
+  .phead{padding:28px 0 4px}
+  .phead h1{font-family:var(--serif);font-weight:700;font-size:24px}
+  .phead p{font-size:13px;color:var(--caption);margin-top:8px;line-height:1.6}
+  .tabs{display:flex;gap:8px;margin:20px 0 4px}
+  .tab{font-family:var(--kr);font-size:14px;font-weight:600;border:1px solid var(--fog);background:#fff;color:var(--caption);border-radius:99px;padding:8px 16px;cursor:pointer}
+  .tab.on{background:var(--ink);color:var(--screen);border-color:var(--ink)}
+  .tab span{font-family:var(--mono);font-size:12px;opacity:.75;margin-left:2px}
+  .sec{margin-top:18px}
+  .empty-note{font-size:13.5px;color:var(--placeholder);line-height:1.7;padding:28px 2px}
+  .empty-note a{color:var(--signal-text);text-decoration:none}
+  .lr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .lrc{position:relative;cursor:pointer;background:none;border:0;padding:0;font-family:var(--kr);display:block;text-align:left}
+  .lrc .pos{position:relative}
+  .lrc img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--fog);display:block}
+  .lrc .noimg{width:100%;aspect-ratio:2/3;border-radius:10px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
+  .lrc .rate{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(19,18,21,.72);color:#fff;border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:10.5px;font-weight:600}
+  .lrc .rate .st{color:var(--signal);font-size:10px}
+  .lrc .lr-by{display:block;font-size:11px;color:var(--caption);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lrc .lr-by b{color:var(--ink);font-weight:600}
+  .lc-list{display:flex;flex-direction:column;gap:10px}
+  .lcc{background:#fff;border:1px solid var(--fog);border-radius:14px;padding:13px 15px;cursor:pointer;text-align:left;width:100%;font-family:var(--kr);display:block}
+  .lcc:hover{border-color:var(--ink)}
+  .lcc .lc-b{font-size:14px;color:var(--ink);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .lcc .lc-by{font-size:12px;color:var(--placeholder);margin-top:7px}
+  .lcc .lc-by b{color:var(--caption);font-weight:600}
   .loading{padding:80px 0;text-align:center;color:var(--caption);font-size:14px}
-  /* 본 영화 포스터 그리드 */
-  .watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .wg{position:relative;cursor:pointer;background:none;border:0;padding:0;font-family:var(--kr);display:block}
-  .wg img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--fog);display:block}
-  .wg .noimg{width:100%;aspect-ratio:2/3;border-radius:10px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
-  .wg .wg-rate{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(19,18,21,.72);color:#fff;border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:10.5px;font-weight:600}
-  .wg .wg-rate .st{color:var(--signal);font-size:10px}
-  .wg .wg-eng{position:absolute;right:6px;top:6px;display:flex;gap:4px}
-  .wg .wg-eng span{background:rgba(19,18,21,.66);color:#fff;border-radius:6px;padding:1px 5px;font-family:var(--mono);font-size:10px}
-  /* 게시물 상세 모달 */
   .overlay{position:fixed;inset:0;background:rgba(19,18,21,.44);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
   .overlay.open{display:flex}
   .modal{width:min(420px,100%);background:var(--screen);border:1px solid var(--fog);border-radius:18px;padding:24px 22px;max-height:90svh;overflow:auto;box-shadow:0 20px 60px rgba(19,18,21,.22)}
@@ -117,6 +99,14 @@
       <a class="brand" href="/">김씨네표류기</a>
       <a class="mine" href="/profile.html">내 프로필 →</a>
     </div>
+    <div class="phead">
+      <h1>내 좋아요</h1>
+      <p>내가 좋아요 누른 한줄평과 댓글을 모아봤어요. (앞으로 모임·소식도 여기 모여요)</p>
+    </div>
+    <div class="tabs">
+      <button class="tab on" id="tabR" type="button">리뷰<span id="cntR"></span></button>
+      <button class="tab" id="tabC" type="button">댓글<span id="cntC"></span></button>
+    </div>
     <div id="body"><div class="loading">불러오는 중…</div></div>
   </div>
 
@@ -131,9 +121,7 @@ const API = "https://api.kim-cine-pyoryugi.kr";
 const OTT={netflix:"넷플릭스",tving:"티빙",coupang:"쿠팡플레이",wavve:"웨이브",disney:"디즈니+",watcha:"왓챠",laftel:"라프텔",appletv:"Apple TV+"};
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const qs = new URLSearchParams(location.search);
-const NICK = (qs.get("u")||"").trim();
-const state = { data:null, det:{}, providers:{}, following:false, busy:false };
+const state = { det:{}, providers:{}, likes:{reviews:[],comments:[]}, tab:"R", loading:false };
 
 async function api(path, opts){
   const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
@@ -141,77 +129,20 @@ async function api(path, opts){
 }
 async function fetchDetails(ids){ if(!ids.length) return {}; const {data}=await api("/api/movies/details?ids="+ids.join(",")); const m={}; (data.results||[]).forEach(x=>m[x.tmdb_id]=x); return m; }
 async function fetchProviders(ids){ if(!ids.length) return {}; const {data}=await api("/api/movies/providers?ids="+ids.join(",")); return (data&&data.providers)||{}; }
-function starsHtml(rating){ const p=Math.max(0,Math.min(10,rating||0))*10; return '<span class="stars" style="--p:'+p+'%"></span>'; }
-function ottHtml(slugs){ if(!slugs||!slugs.length) return ''; return '<div class="ott-row">'+slugs.map(s=>'<span class="ott-badge">'+esc(OTT[s]||s)+'</span>').join('')+'</div>'; }
-
-async function toggleFollow(){
-  if(state.busy) return; state.busy=true;
-  const btn=$("followBtn"); if(btn) btn.disabled=true;
-  const path = state.following ? "/api/unfollow" : "/api/follow";
-  const { status, data } = await api(path, { method:"POST", body: JSON.stringify({ nick: NICK }) });
-  state.busy=false;
-  if(status===200 && data.ok){
-    state.following = !!data.following;
-    const u = state.data.user;
-    u.followers = Math.max(0, (u.followers||0) + (state.following?1:-1));
-    renderHead();
-  } else if(btn){ btn.disabled=false; }
-}
-function renderHead(){
-  const d = state.data, u = d.user;
-  const av = u.avatar_url ? '<img src="'+esc(u.avatar_url)+'" alt="">' : esc(u.emoji||"🐥");
-  const joined = (u.created_at||"").slice(0,7).replace("-",".");
-  const followBtn = d.is_me ? '' :
-    '<div class="followbar"><button class="btn-follow'+(state.following?' on':'')+'" id="followBtn">'+(state.following?'팔로잉':'팔로우')+'</button></div>';
-  $("phead").innerHTML =
-    '<div class="avatar">'+av+'</div>'+
-    '<div class="nick">'+esc(u.nickname)+'</div>'+
-    (joined?'<div class="joined">'+esc(joined)+' 승선</div>':'')+
-    '<div class="bio'+(u.bio?'':' empty')+'">'+(u.bio?esc(u.bio):"자기소개가 아직 없어요.")+'</div>'+
-    '<div class="stats">'+
-      '<div class="stat"><b>'+(d.reviews||[]).length+'</b><span>본 영화</span></div>'+
-      '<div class="stat"><b>'+(u.followers||0)+'</b><span>팔로워</span></div>'+
-      '<div class="stat"><b>'+(u.following||0)+'</b><span>팔로잉</span></div>'+
-    '</div>'+ followBtn;
-  const fb = $("followBtn"); if(fb) fb.onclick = toggleFollow;
-}
-function renderReviews(){
-  const d = state.data, revs = d.reviews||[];
-  const sec = $("revSec");
-  if(!revs.length){ sec.innerHTML = '<div class="sec-h"><h2>본 영화</h2></div><div class="empty-note">아직 기록한 영화가 없어요.</div>'; return; }
-  sec.innerHTML = '<div class="sec-h"><h2>본 영화</h2></div>';
-  const grid = document.createElement("div"); grid.className = "watch-grid";
-  revs.forEach(r=>{
-    const m = state.det[r.tmdb_id]||{};
-    const title = m.title || ("영화 #"+r.tmdb_id);
-    const poster = m.poster || "";
-    const cell = document.createElement("button"); cell.type="button"; cell.className="wg"; cell.title=title;
-    const eng=[];
-    if(r.like_count) eng.push('<span>♥ '+r.like_count+'</span>');
-    if(r.comment_count) eng.push('<span>💬 '+r.comment_count+'</span>');
-    cell.innerHTML =
-      (poster?'<img loading="lazy" src="'+esc(poster)+'" alt="'+esc(title)+'">':'<div class="noimg">🎬</div>')+
-      (eng.length?'<div class="wg-eng">'+eng.join('')+'</div>':'')+
-      '<div class="wg-rate"><span class="st">★</span>'+(r.rating/2).toFixed(1)+'</div>';
-    cell.onclick = () => openPost(r.id);
-    grid.appendChild(cell);
-  });
-  sec.appendChild(grid);
-}
-
-/* ---- 게시물 상세 (인스타식: 좋아요·댓글) ---- */
-const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-10.1-9.3C.3 8.4 2 4.8 5.4 4.8c2 0 3.4 1.2 4.3 2.5l.3.4.3-.4c.9-1.3 2.3-2.5 4.3-2.5 3.4 0 5.1 3.6 3.5 6.9C19.6 16.3 12 21 12 21z"/></svg>';
+function starsHtml(rating){ const p=Math.max(0,Math.min(10,rating||0))*10; return '<span class="stars" style="--p:'+p+'%;display:inline-block;font-size:14px;letter-spacing:1px;line-height:1;background:linear-gradient(90deg,var(--signal) '+p+'%,#D9D4CA '+p+'%);-webkit-background-clip:text;background-clip:text;color:transparent">★★★★★</span>'; }
+function ottHtml(slugs){ if(!slugs||!slugs.length) return ''; return '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">'+slugs.map(s=>'<span style="font-size:11px;font-weight:600;color:var(--ink);background:var(--screen);border:1px solid var(--fog);border-radius:6px;padding:3px 7px">'+esc(OTT[s]||s)+'</span>').join('')+'</div>'; }
 function fmtTime(ts){
   if(!ts) return "";
   const t = Date.parse(String(ts).replace(" ","T")+"Z"); if(isNaN(t)) return "";
-  const diff = (Date.now()-t)/1000;
-  if(diff<60) return "방금";
-  if(diff<3600) return Math.floor(diff/60)+"분 전";
-  if(diff<86400) return Math.floor(diff/3600)+"시간 전";
-  if(diff<2592000) return Math.floor(diff/86400)+"일 전";
+  const diff=(Date.now()-t)/1000;
+  if(diff<60) return "방금"; if(diff<3600) return Math.floor(diff/60)+"분 전";
+  if(diff<86400) return Math.floor(diff/3600)+"시간 전"; if(diff<2592000) return Math.floor(diff/86400)+"일 전";
   return String(ts).slice(0,10).replace(/-/g,".");
 }
-const post = { id:null, data:null, busy:false };
+const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-10.1-9.3C.3 8.4 2 4.8 5.4 4.8c2 0 3.4 1.2 4.3 2.5l.3.4.3-.4c.9-1.3 2.3-2.5 4.3-2.5 3.4 0 5.1 3.6 3.5 6.9C19.6 16.3 12 21 12 21z"/></svg>';
+
+/* ---- 게시물 상세 (인스타식) ---- */
+const post = { id:null, data:null, busy:false, changed:false };
 async function openPost(reviewId){
   post.id = reviewId; post.data = null;
   $("postBody").innerHTML = '<div class="loading" style="padding:40px 0">불러오는 중…</div>';
@@ -224,7 +155,10 @@ async function openPost(reviewId){
   if(!state.providers[tid]){ const pv = await fetchProviders([tid]); Object.assign(state.providers, pv); }
   renderPost();
 }
-function closePost(){ $("overlayPost").classList.remove("open"); post.id=null; post.data=null; }
+function closePost(){
+  $("overlayPost").classList.remove("open"); post.id=null; post.data=null;
+  if(post.changed){ post.changed=false; loadLikes(); }
+}
 function renderPost(){
   const d = post.data; if(!d) return;
   const r = d.review, a = r.author || {}, m = state.det[r.tmdb_id] || {};
@@ -280,9 +214,8 @@ async function togglePostLike(){
   const { status, data } = await api(want?"/api/like":"/api/unlike", { method:"POST", body: JSON.stringify({ type:"review", id: d.review.id }) });
   post.busy = false;
   if(status===200 && data.ok){
-    d.liked_by_me = data.liked; d.like_count = data.count;
+    d.liked_by_me = data.liked; d.like_count = data.count; post.changed = true;
     const btn=$("postLike"), c=$("postLikeC"); if(btn) btn.classList.toggle("on", data.liked); if(c) c.textContent = data.count;
-    const rv = ((state.data&&state.data.reviews)||[]).find(x=>x.id===d.review.id); if(rv) rv.like_count = data.count;
   }
 }
 async function toggleCommentLike(c){
@@ -290,7 +223,7 @@ async function toggleCommentLike(c){
   const want = !c.liked_by_me;
   const { status, data } = await api(want?"/api/like":"/api/unlike", { method:"POST", body: JSON.stringify({ type:"comment", id: c.id }) });
   post.busy = false;
-  if(status===200 && data.ok){ c.liked_by_me = data.liked; c.like_count = data.count; renderComments(); }
+  if(status===200 && data.ok){ c.liked_by_me = data.liked; c.like_count = data.count; post.changed = true; renderComments(); }
 }
 async function sendComment(){
   if(post.busy || !post.data) return;
@@ -303,7 +236,6 @@ async function sendComment(){
     post.data.comments.push(data.comment);
     ta.value = ""; ta.style.height = "auto";
     $("postCmtC").textContent = post.data.comments.length;
-    const rv = ((state.data&&state.data.reviews)||[]).find(x=>x.id===post.data.review.id); if(rv) rv.comment_count = (rv.comment_count||0)+1;
     renderComments();
     const list=$("cmtList"); if(list) list.scrollTop = list.scrollHeight;
   } else {
@@ -317,25 +249,69 @@ async function removeComment(c){
   if(status===200 && data.ok){
     post.data.comments = (post.data.comments||[]).filter(x=>x.id!==c.id);
     const cc=$("postCmtC"); if(cc) cc.textContent = post.data.comments.length;
-    const rv = ((state.data&&state.data.reviews)||[]).find(x=>x.id===post.data.review.id); if(rv) rv.comment_count = Math.max(0,(rv.comment_count||1)-1);
-    renderComments();
+    post.changed = true; renderComments();
   }
 }
 $("overlayPost").addEventListener("click", (e) => { if(e.target === $("overlayPost")) closePost(); });
 document.addEventListener("keydown", (e) => { if(e.key === "Escape") closePost(); });
 
+/* ---- 좋아요 목록 렌더 ---- */
+function renderLikes(){
+  const body = $("body");
+  const L = state.likes;
+  $("cntR").textContent = (L.reviews||[]).length ? " "+L.reviews.length : "";
+  $("cntC").textContent = (L.comments||[]).length ? " "+L.comments.length : "";
+  if(state.tab === "R"){
+    const revs = L.reviews || [];
+    if(!revs.length){ body.innerHTML = '<div class="empty-note">아직 좋아요한 한줄평이 없어요.<br>선원들 프로필에서 마음에 드는 한줄평에 ♥를 눌러보세요.</div>'; return; }
+    body.innerHTML = "";
+    const grid = document.createElement("div"); grid.className = "lr-grid";
+    revs.forEach(r => {
+      const m = state.det[r.tmdb_id] || {};
+      const poster = m.poster || "";
+      const cell = document.createElement("button"); cell.type="button"; cell.className="lrc";
+      cell.innerHTML =
+        '<div class="pos">'+
+          (poster?'<img loading="lazy" src="'+esc(poster)+'" alt="">':'<div class="noimg">🎬</div>')+
+          '<div class="rate"><span class="st">★</span>'+(r.rating/2).toFixed(1)+'</div>'+
+        '</div>'+
+        '<span class="lr-by"><b>'+esc(r.author||"선원")+'</b>'+(r.one_liner?' · '+esc(r.one_liner):'')+'</span>';
+      cell.onclick = () => openPost(r.review_id);
+      grid.appendChild(cell);
+    });
+    body.appendChild(grid);
+  } else {
+    const cms = L.comments || [];
+    if(!cms.length){ body.innerHTML = '<div class="empty-note">아직 좋아요한 댓글이 없어요.<br>한줄평에 달린 댓글에도 ♥를 누를 수 있어요.</div>'; return; }
+    body.innerHTML = "";
+    const list = document.createElement("div"); list.className = "lc-list";
+    cms.forEach(c => {
+      const cell = document.createElement("button"); cell.type="button"; cell.className="lcc";
+      cell.innerHTML = '<div class="lc-b">'+esc(c.body)+'</div><div class="lc-by"><b>'+esc(c.author||"선원")+'</b> 님의 댓글 · 눌러서 원글 보기</div>';
+      cell.onclick = () => openPost(c.review_id);
+      list.appendChild(cell);
+    });
+    body.appendChild(list);
+  }
+}
+async function loadLikes(){
+  if(state.loading) return; state.loading = true;
+  const { status, data } = await api("/api/likes");
+  state.loading = false;
+  if(status===401){ location.href="/auth.html?mode=login"; return; }
+  if(!data.ok){ $("body").innerHTML = '<div class="empty-note">불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>'; return; }
+  state.likes = { reviews: data.reviews||[], comments: data.comments||[] };
+  const ids = [...new Set((state.likes.reviews||[]).map(r=>r.tmdb_id))];
+  if(ids.length){ const det = await fetchDetails(ids); Object.assign(state.det, det); }
+  renderLikes();
+}
+$("tabR").onclick = () => { state.tab="R"; $("tabR").classList.add("on"); $("tabC").classList.remove("on"); renderLikes(); };
+$("tabC").onclick = () => { state.tab="C"; $("tabC").classList.add("on"); $("tabR").classList.remove("on"); renderLikes(); };
+
 (async () => {
-  if(!NICK){ $("body").innerHTML='<div class="loading">사용자를 찾을 수 없어요.</div>'; return; }
   const me = await api("/api/me");
   if(me.status===401 || !me.data.ok){ location.href="/auth.html?mode=login"; return; }
-  const res = await api("/api/u?nick="+encodeURIComponent(NICK));
-  if(res.status===404 || !res.data.ok){ $("body").innerHTML='<div class="loading">'+esc((res.data&&res.data.error)||"없는 사용자예요.")+'</div>'; return; }
-  state.data = res.data; state.following = !!res.data.is_following;
-  const revIds = (res.data.reviews||[]).map(r=>r.tmdb_id);
-  const [det, providers] = await Promise.all([ revIds.length?fetchDetails(revIds):Promise.resolve({}), revIds.length?fetchProviders(revIds):Promise.resolve({}) ]);
-  state.det = det; state.providers = providers;
-  $("body").innerHTML = '<div class="phead" id="phead"></div><div class="sec" id="revSec"></div>';
-  renderHead(); renderReviews();
+  loadLikes();
 })();
 </script>
 </body>
