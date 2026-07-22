@@ -213,6 +213,21 @@
   .cmt-add textarea:focus{border-color:var(--ink)}
   .cmt-add button{flex:0 0 auto;font-family:var(--kr);font-size:14px;font-weight:600;background:var(--ink);color:var(--screen);border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
   .cmt-add button:disabled{opacity:.4;cursor:default}
+  .stat.fstat{cursor:pointer}
+  .fl-modal{width:min(420px,100%)}
+  .fl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .fl-head h3{font-family:var(--serif);font-size:19px;font-weight:700}
+  .fl-head .px{background:none;border:0;cursor:pointer;color:var(--caption);font-size:24px;line-height:1;padding:2px 4px}
+  .fl-list{display:flex;flex-direction:column;gap:2px;max-height:60svh;overflow:auto}
+  .fl-row{display:flex;align-items:center;gap:11px;padding:9px 6px;cursor:pointer;border-radius:10px}
+  .fl-row:hover{background:#fff}
+  .fl-av{width:40px;height:40px;flex:0 0 40px;border-radius:50%;background:#fff;border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+  .fl-av img{width:100%;height:100%;object-fit:cover}
+  .fl-nk{flex:1;min-width:0;font-size:14.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fl-btn{flex:0 0 auto;font-family:var(--kr);font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 14px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--screen)}
+  .fl-btn.on{background:#fff;color:var(--ink);border-color:var(--fog)}
+  .fl-btn:disabled{opacity:.5}
+  .fl-empty{font-size:13px;color:var(--placeholder);padding:26px 4px;text-align:center}
   @media (max-width:480px){ .wrap{padding:0 16px 80px} .modal{padding:22px 18px} }
 </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -375,6 +390,13 @@
     </div>
   </div>
 
+  <div class="overlay" id="overlayFollows">
+    <div class="modal fl-modal" role="dialog" aria-modal="true">
+      <div class="fl-head"><h3 id="flTitle">팔로워</h3><button class="px" id="flX" aria-label="닫기">×</button></div>
+      <div id="flList"><div class="loading" style="padding:30px 0">불러오는 중…</div></div>
+    </div>
+  </div>
+
 <script>
 const API = "https://api.kim-cine-pyoryugi.kr";
 const GENRE={28:"액션",12:"모험",16:"애니메이션",35:"코미디",80:"범죄",99:"다큐",18:"드라마",10751:"가족",14:"판타지",36:"역사",27:"공포",10402:"음악",9648:"미스터리",10749:"로맨스",878:"SF",53:"스릴러",10752:"전쟁",37:"서부"};
@@ -518,7 +540,7 @@ $("avaPick").onclick = () => $("avaFile").click();
 $("avaFile").addEventListener("change", onAvaFile);
 $("avaDel").onclick = onAvaDelete;
 $("overlay").addEventListener("click", (e) => { if(e.target === $("overlay")) closeEdit(); });
-document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); closePost(); } });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape"){ closeEdit(); closeSet(); closeDel(); closeReview(); closeSearch(); closePost(); closeFollows(); } });
 buildPicks();
 /* ---- 설정 모달 (계정 정보 · 비밀번호 변경) ---- */
 function openSet(){
@@ -883,6 +905,43 @@ async function removeComment(c){
 }
 $("overlayPost").addEventListener("click", (e) => { if(e.target === $("overlayPost")) closePost(); });
 
+/* ---- 팔로워/팔로잉 목록 ---- */
+function openFollows(type, nick){
+  if(!nick) return;
+  $("flTitle").textContent = type==="following" ? "팔로잉" : "팔로워";
+  $("flList").className = "";
+  $("flList").innerHTML = '<div class="loading" style="padding:30px 0">불러오는 중…</div>';
+  $("overlayFollows").classList.add("open");
+  api("/api/follows?type="+type+"&nick="+encodeURIComponent(nick)).then(({status,data})=>{
+    if(status!==200 || !data.ok){ $("flList").innerHTML = '<div class="fl-empty">'+esc((data&&data.error)||"불러오지 못했어요.")+'</div>'; return; }
+    renderFollows(data.list||[]);
+  });
+}
+function closeFollows(){ $("overlayFollows").classList.remove("open"); }
+function renderFollows(list){
+  const box = $("flList");
+  if(!list.length){ box.className=""; box.innerHTML = '<div class="fl-empty">아직 없어요.</div>'; return; }
+  box.className = "fl-list"; box.innerHTML = "";
+  list.forEach(u => {
+    const row = document.createElement("div"); row.className = "fl-row";
+    const av = u.avatar_url ? '<img src="'+esc(u.avatar_url)+'" alt="">' : esc(u.emoji||"🐥");
+    const btn = u.is_me ? '' : '<button class="fl-btn'+(u.is_following?' on':'')+'" type="button">'+(u.is_following?'팔로잉':'팔로우')+'</button>';
+    row.innerHTML = '<div class="fl-av">'+av+'</div><div class="fl-nk">'+esc(u.nickname)+'</div>'+btn;
+    row.onclick = () => { location.href = "/u.html?u="+encodeURIComponent(u.nickname); };
+    const b = row.querySelector(".fl-btn");
+    if(b){ b.onclick = (e) => { e.stopPropagation(); toggleFollowRow(u, b); }; }
+    box.appendChild(row);
+  });
+}
+async function toggleFollowRow(u, btn){
+  btn.disabled = true;
+  const { status, data } = await api(u.is_following?"/api/unfollow":"/api/follow", { method:"POST", body: JSON.stringify({ nick: u.nickname }) });
+  btn.disabled = false;
+  if(status===200 && data.ok){ u.is_following = !!data.following; btn.classList.toggle("on", u.is_following); btn.textContent = u.is_following ? '팔로잉' : '팔로우'; }
+}
+$("overlayFollows").addEventListener("click", (e) => { if(e.target === $("overlayFollows")) closeFollows(); });
+$("flX").onclick = closeFollows;
+
 function render(){
   const me = state.me || {}, pf = state.pf || {}, det = state.det || {};
   const body = $("body"); body.innerHTML = "";
@@ -896,12 +955,13 @@ function render(){
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
     '<div class="stats">' +
       '<div class="stat"><b>'+ (state.reviews||[]).length +'</b><span>본 영화</span></div>' +
-      '<div class="stat"><b>'+ (me.followers||0) +'</b><span>팔로워</span></div>' +
-      '<div class="stat"><b>'+ (me.following||0) +'</b><span>팔로잉</span></div>' +
+      '<div class="stat fstat" data-ft="followers"><b>'+ (me.followers||0) +'</b><span>팔로워</span></div>' +
+      '<div class="stat fstat" data-ft="following"><b>'+ (me.following||0) +'</b><span>팔로잉</span></div>' +
     '</div>';
   body.appendChild(head);
   const _av = document.getElementById("myAvatar");
   if(_av){ _av.setAttribute("role","button"); _av.title="프로필 사진 변경"; _av.onclick = openEdit; }
+  head.querySelectorAll("[data-ft]").forEach(el => { el.onclick = () => openFollows(el.dataset.ft, state.me.nickname); });
 
   // 최애 영화 (실제 포스터)
   const favIds = (pf.favorites||[]).map(f=>f.tmdb_id);
