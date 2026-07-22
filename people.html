@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>김씨네표류기 — 선원 찾기</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+<style>
+  :root{--ink:#131215;--screen:#FAF8F4;--signal:#F4562B;--signal-text:#C7401A;--fog:#E9E5DD;--caption:#6B665D;--placeholder:#A8A29A;
+    --serif:'Noto Serif KR','Noto Serif CJK KR','Apple Myungjo',serif;
+    --kr:'Pretendard Variable','Pretendard',-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--screen);color:var(--ink);font-family:var(--kr);min-height:100svh}
+  .wrap{width:min(600px,100%);margin:0 auto;padding:0 20px 96px}
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;background:var(--screen);padding:16px 0;border-bottom:1px solid var(--fog)}
+  .topbar .brand{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  .topbar .mine{font-size:13px;color:var(--caption);text-decoration:none}
+  .topbar .mine:hover{color:var(--signal-text)}
+  .phead{padding:28px 0 4px}
+  .phead h1{font-family:var(--serif);font-weight:700;font-size:24px}
+  .phead p{font-size:13px;color:var(--caption);margin-top:8px;line-height:1.6}
+  .sbar{position:relative;margin:18px 0 6px}
+  .sbar input{width:100%;font-family:var(--kr);font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--fog);border-radius:12px;padding:13px 14px 13px 42px;outline:none}
+  .sbar input:focus{border-color:var(--ink)}
+  .sbar svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--placeholder);fill:none;stroke-width:2}
+  .list{display:flex;flex-direction:column;gap:2px;margin-top:10px}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 6px;cursor:pointer;border-radius:12px}
+  .row:hover{background:#fff}
+  .av{width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:#fff;border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+  .av img{width:100%;height:100%;object-fit:cover}
+  .info{flex:1;min-width:0}
+  .info .nk{font-size:15px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .info .bio{font-size:12.5px;color:var(--caption);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fbtn{flex:0 0 auto;font-family:var(--kr);font-size:13px;font-weight:600;border-radius:9px;padding:8px 16px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--screen)}
+  .fbtn.on{background:#fff;color:var(--ink);border-color:var(--fog)}
+  .fbtn.me{background:#fff;color:var(--placeholder);border-color:var(--fog);cursor:default}
+  .fbtn:disabled{opacity:.5}
+  .note{font-size:13.5px;color:var(--placeholder);padding:36px 4px;text-align:center;line-height:1.6}
+  @media (max-width:480px){ .wrap{padding:0 16px 80px} }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="brand" href="/">김씨네표류기</a>
+      <a class="mine" href="/profile.html">내 프로필 →</a>
+    </div>
+    <div class="phead">
+      <h1>선원 찾기</h1>
+      <p>닉네임으로 다른 선원을 찾아 팔로우해보세요.</p>
+    </div>
+    <div class="sbar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" placeholder="닉네임 검색" autocomplete="off" autofocus>
+    </div>
+    <div id="body"><div class="note">닉네임을 입력하면 선원이 검색돼요.</div></div>
+  </div>
+<script>
+const API = "https://api.kim-cine-pyoryugi.kr";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function api(path, opts){
+  const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
+  return { status:r.status, data: await r.json().catch(()=>({})) };
+}
+let timer=null, busy=false;
+function render(results, q){
+  const body=$("body");
+  if(!q){ body.innerHTML='<div class="note">닉네임을 입력하면 선원이 검색돼요.</div>'; return; }
+  if(!results.length){ body.innerHTML='<div class="note">‘'+esc(q)+'’ 에 해당하는 선원이 없어요.</div>'; return; }
+  body.innerHTML="";
+  const list=document.createElement("div"); list.className="list";
+  results.forEach(u=>{
+    const row=document.createElement("div"); row.className="row";
+    const av=u.avatar_url?'<img src="'+esc(u.avatar_url)+'" alt="">':esc(u.emoji||"🐥");
+    const btn=u.is_me
+      ? '<span class="fbtn me">나</span>'
+      : '<button class="fbtn'+(u.is_following?' on':'')+'" type="button">'+(u.is_following?'팔로잉':'팔로우')+'</button>';
+    row.innerHTML='<div class="av">'+av+'</div>'+
+      '<div class="info"><div class="nk">'+esc(u.nickname)+'</div>'+(u.bio?'<div class="bio">'+esc(u.bio)+'</div>':'')+'</div>'+btn;
+    row.onclick=()=>{ location.href="/u.html?u="+encodeURIComponent(u.nickname); };
+    const b=row.querySelector("button.fbtn");
+    if(b){ b.onclick=(e)=>{ e.stopPropagation(); toggleFollow(u,b); }; }
+    list.appendChild(row);
+  });
+  body.appendChild(list);
+}
+async function toggleFollow(u, btn){
+  if(busy) return; busy=true; btn.disabled=true;
+  const { status, data } = await api(u.is_following?"/api/unfollow":"/api/follow", { method:"POST", body: JSON.stringify({ nick: u.nickname }) });
+  busy=false; btn.disabled=false;
+  if(status===200 && data.ok){ u.is_following=!!data.following; btn.classList.toggle("on",u.is_following); btn.textContent=u.is_following?'팔로잉':'팔로우'; }
+}
+async function search(){
+  const q=$("q").value.trim();
+  if(!q){ render([], ""); return; }
+  const { status, data } = await api("/api/users/search?q="+encodeURIComponent(q));
+  if(status===401){ location.href="/auth.html?mode=login"; return; }
+  if(status!==200 || !data.ok){ $("body").innerHTML='<div class="note">검색에 실패했어요. 잠시 후 다시 시도해주세요.</div>'; return; }
+  render(data.results||[], q);
+}
+$("q").addEventListener("input", ()=>{ clearTimeout(timer); timer=setTimeout(search, 300); });
+$("q").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ clearTimeout(timer); search(); } });
+(async () => {
+  const me = await api("/api/me");
+  if(me.status===401 || !me.data.ok){ location.href="/auth.html?mode=login"; return; }
+})();
+</script>
+</body>
+</html>

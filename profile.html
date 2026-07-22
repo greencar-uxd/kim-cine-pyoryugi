@@ -241,6 +241,7 @@
         <div class="menu" id="menu">
           <button id="mEdit">프로필 편집</button>
           <button id="mLikes">내 좋아요</button>
+          <button id="mPeople">선원 찾기</button>
           <button id="mSettings">설정</button>
           <button id="mAdmin" style="display:none">관리자 보드</button>
           <div class="sep"></div>
@@ -532,6 +533,7 @@ async function saveEdit(){
 }
 $("mEdit").onclick = openEdit;
 $("mLikes").onclick = () => location.href = "/likes.html";
+$("mPeople").onclick = () => location.href = "/people.html";
 $("eCancel").onclick = closeEdit;
 $("eSave").onclick = saveEdit;
 $("fEmoji").addEventListener("input", syncEmoji);
