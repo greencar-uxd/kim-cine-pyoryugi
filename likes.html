@@ -37,6 +37,12 @@
   .lrc .rate .st{color:var(--signal);font-size:10px}
   .lrc .lr-by{display:block;font-size:11px;color:var(--caption);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lrc .lr-by b{color:var(--ink);font-weight:600}
+  .wc{position:relative;display:block}
+  .wc img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--fog);display:block}
+  .wc .noimg{width:100%;aspect-ratio:2/3;border-radius:10px;background:var(--fog);display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:22px}
+  .wc .wt{display:block;font-size:11px;color:var(--caption);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wc .wdel{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(19,18,21,.66);color:#fff;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .wc .wdel:disabled{opacity:.5;cursor:default}
   .lc-list{display:flex;flex-direction:column;gap:10px}
   .lcc{background:#fff;border:1px solid var(--fog);border-radius:14px;padding:13px 15px;cursor:pointer;text-align:left;width:100%;font-family:var(--kr);display:block}
   .lcc:hover{border-color:var(--ink)}
@@ -102,11 +108,12 @@
       <a class="mine" href="/profile.html">내 프로필 →</a>
     </div>
     <div class="phead">
-      <h1>내 좋아요</h1>
-      <p>내가 좋아요 누른 한줄평과 댓글을 모아봤어요. (앞으로 모임·소식도 여기 모여요)</p>
+      <h1>내 보관함</h1>
+      <p>보고싶은 영화와 좋아요한 한줄평·댓글을 모아둔 곳이에요. (앞으로 모임·소식도 여기 모여요)</p>
     </div>
     <div class="tabs">
-      <button class="tab on" id="tabR" type="button">리뷰<span id="cntR"></span></button>
+      <button class="tab on" id="tabW" type="button">보고싶어요<span id="cntW"></span></button>
+      <button class="tab" id="tabR" type="button">리뷰<span id="cntR"></span></button>
       <button class="tab" id="tabC" type="button">댓글<span id="cntC"></span></button>
     </div>
     <div id="body"><div class="loading">불러오는 중…</div></div>
@@ -123,7 +130,7 @@ const API = "https://api.kim-cine-pyoryugi.kr";
 const OTT={netflix:"넷플릭스",tving:"티빙",coupang:"쿠팡플레이",wavve:"웨이브",disney:"디즈니+",watcha:"왓챠",laftel:"라프텔",appletv:"Apple TV+"};
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const state = { det:{}, providers:{}, likes:{reviews:[],comments:[]}, tab:"R", loading:false };
+const state = { det:{}, providers:{}, likes:{reviews:[],comments:[]}, watch:[], tab:"W", loading:false };
 
 async function api(path, opts){
   const r = await fetch(API + path, Object.assign({ credentials:"include", headers:{ "Content-Type":"application/json" } }, opts||{}));
@@ -263,6 +270,27 @@ function renderLikes(){
   const L = state.likes;
   $("cntR").textContent = (L.reviews||[]).length ? " "+L.reviews.length : "";
   $("cntC").textContent = (L.comments||[]).length ? " "+L.comments.length : "";
+  $("cntW").textContent = (state.watch||[]).length ? " "+state.watch.length : "";
+  if(state.tab === "W"){
+    const ws = state.watch || [];
+    if(!ws.length){ body.innerHTML = '<div class="empty-note">아직 보고싶은 영화가 없어요.<br>영화를 검색해 <b>＋ 보고싶어요</b>로 담아보세요. · <a href="/profile.html">프로필에서 담기</a></div>'; return; }
+    body.innerHTML = "";
+    const grid = document.createElement("div"); grid.className = "lr-grid";
+    ws.forEach(w => {
+      const m = state.det[w.tmdb_id] || {};
+      const poster = m.poster || "";
+      const title = m.title || ("영화 #"+w.tmdb_id);
+      const cell = document.createElement("div"); cell.className = "wc";
+      cell.innerHTML =
+        (poster?'<img loading="lazy" src="'+esc(poster)+'" alt="'+esc(title)+'">':'<div class="noimg">🎬</div>')+
+        '<button class="wdel" type="button" title="빼기" aria-label="보고싶어요에서 빼기">×</button>'+
+        '<span class="wt">'+esc(title)+'</span>';
+      cell.querySelector(".wdel").onclick = () => removeWatch(w, cell.querySelector(".wdel"));
+      grid.appendChild(cell);
+    });
+    body.appendChild(grid);
+    return;
+  }
   if(state.tab === "R"){
     const revs = L.reviews || [];
     if(!revs.length){ body.innerHTML = '<div class="empty-note">아직 좋아요한 한줄평이 없어요.<br>선원들 프로필에서 마음에 드는 한줄평에 ♥를 눌러보세요.</div>'; return; }
@@ -298,17 +326,27 @@ function renderLikes(){
 }
 async function loadLikes(){
   if(state.loading) return; state.loading = true;
-  const { status, data } = await api("/api/likes");
+  const [lk, pf] = await Promise.all([ api("/api/likes"), api("/api/prefs") ]);
   state.loading = false;
-  if(status===401){ location.href="/auth.html?mode=login"; return; }
-  if(!data.ok){ $("body").innerHTML = '<div class="empty-note">불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>'; return; }
-  state.likes = { reviews: data.reviews||[], comments: data.comments||[] };
-  const ids = [...new Set((state.likes.reviews||[]).map(r=>r.tmdb_id))];
+  if(lk.status===401 || pf.status===401){ location.href="/auth.html?mode=login"; return; }
+  if(!lk.data.ok){ $("body").innerHTML = '<div class="empty-note">불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>'; return; }
+  state.likes = { reviews: lk.data.reviews||[], comments: lk.data.comments||[] };
+  state.watch = ((pf.data&&pf.data.watchlist)||[]).filter(w => w.status !== 'seen');
+  const ids = [...new Set([].concat((state.likes.reviews||[]).map(r=>r.tmdb_id), state.watch.map(w=>w.tmdb_id)))];
   if(ids.length){ const det = await fetchDetails(ids); Object.assign(state.det, det); }
   renderLikes();
 }
-$("tabR").onclick = () => { state.tab="R"; $("tabR").classList.add("on"); $("tabC").classList.remove("on"); renderLikes(); };
-$("tabC").onclick = () => { state.tab="C"; $("tabC").classList.add("on"); $("tabR").classList.remove("on"); renderLikes(); };
+function setTab(t){ state.tab=t; ["W","R","C"].forEach(x=>$("tab"+x).classList.toggle("on", x===t)); renderLikes(); }
+$("tabW").onclick = () => setTab("W");
+$("tabR").onclick = () => setTab("R");
+$("tabC").onclick = () => setTab("C");
+async function removeWatch(w, btn){
+  if(btn.disabled) return; btn.disabled = true;
+  const { status, data } = await api("/api/watchlist", { method:"POST", body: JSON.stringify({ tmdb_id: w.tmdb_id, want:false }) });
+  if(status===401){ location.href="/auth.html?mode=login"; return; }
+  if(status===200 && data.ok){ state.watch = (state.watch||[]).filter(x=>x.tmdb_id!==w.tmdb_id); renderLikes(); }
+  else { btn.disabled = false; }
+}
 
 (async () => {
   const me = await api("/api/me");

@@ -152,8 +152,12 @@
   /* 검색 모달 */
   .srch-list{max-height:46svh;overflow:auto;margin-bottom:14px}
   .srch-empty{font-size:13px;color:var(--placeholder);padding:16px 2px}
-  .srch-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;width:100%;background:none;border:0;text-align:left;font-family:var(--kr)}
-  .srch-item:hover{background:#fff}
+  .srch-item{display:flex;gap:8px;align-items:center;padding:4px;border-radius:10px}
+  .srch-item .si-main{display:flex;gap:10px;align-items:center;padding:6px;border-radius:8px;cursor:pointer;flex:1;min-width:0;background:none;border:0;text-align:left;font-family:var(--kr)}
+  .srch-item .si-main:hover{background:#fff}
+  .srch-item .si-wl{flex:0 0 auto;font-family:var(--kr);font-size:12px;font-weight:600;white-space:nowrap;border:1px solid var(--fog);background:#fff;color:var(--signal-text);border-radius:8px;padding:7px 10px;cursor:pointer}
+  .srch-item .si-wl.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+  .srch-item .si-wl:disabled{opacity:.5;cursor:default}
   .srch-item img,.srch-item .noimg{width:38px;flex:0 0 38px;aspect-ratio:2/3;object-fit:cover;border-radius:5px;background:var(--fog)}
   .srch-item .noimg{display:flex;align-items:center;justify-content:center;color:var(--placeholder);font-size:14px}
   .srch-item .si-t{font-size:14px;color:var(--ink);line-height:1.3}
@@ -701,13 +705,37 @@ async function runSearch(){
   if(!results.length){ $("scList").innerHTML = '<div class="srch-empty">검색 결과가 없어요.</div>'; return; }
   $("scList").innerHTML = "";
   results.slice(0,12).forEach(m => {
-    const it = document.createElement("button"); it.type = "button"; it.className = "srch-item";
+    const it = document.createElement("div"); it.className = "srch-item";
     const poster = (m.poster ? m.poster.replace("/w342","/w92") : "");
-    it.innerHTML = (poster ? '<img src="'+esc(poster)+'" alt="">' : '<div class="noimg">🎬</div>') +
+    const main = document.createElement("button"); main.type = "button"; main.className = "si-main";
+    main.innerHTML = (poster ? '<img src="'+esc(poster)+'" alt="">' : '<div class="noimg">🎬</div>') +
       '<div><div class="si-t">'+ esc(m.title||"") +'</div><div class="si-y">'+ esc(m.year||"") +'</div></div>';
-    it.onclick = () => openReview({ tmdb_id: m.tmdb_id, title: m.title, year: m.year, poster: m.poster }, null);
+    main.onclick = () => openReview({ tmdb_id: m.tmdb_id, title: m.title, year: m.year, poster: m.poster }, null);
+    it.appendChild(main);
+    const reviewed = (state.reviews||[]).some(r => r.tmdb_id === m.tmdb_id);
+    if(!reviewed){
+      const wl = document.createElement("button"); wl.type = "button"; wl.className = "si-wl";
+      setWlBtn(wl, wlHas(m.tmdb_id));
+      wl.onclick = (e) => { e.stopPropagation(); toggleWatch(m, wl); };
+      it.appendChild(wl);
+    }
     $("scList").appendChild(it);
   });
+}
+function wlHas(tid){ return ((state.pf&&state.pf.watchlist)||[]).some(w=>w.tmdb_id===tid); }
+function setWlBtn(btn, on){ btn.classList.toggle("on", on); btn.textContent = on ? "담김 ✓" : "＋ 보고싶어요"; }
+async function toggleWatch(m, btn){
+  if(btn.disabled) return; btn.disabled = true;
+  const want = !btn.classList.contains("on");
+  const { status, data } = await api("/api/watchlist", { method:"POST", body: JSON.stringify({ tmdb_id: m.tmdb_id, want }) });
+  btn.disabled = false;
+  if(status===401){ location.href="/auth.html?mode=login"; return; }
+  if(status===200 && data.ok){
+    setWlBtn(btn, want);
+    state.pf = state.pf || {}; const wl = state.pf.watchlist = state.pf.watchlist || [];
+    if(want){ if(!wl.some(w=>w.tmdb_id===m.tmdb_id)) wl.push({tmdb_id:m.tmdb_id, status:'want'}); state.det = state.det||{}; if(!state.det[m.tmdb_id]) state.det[m.tmdb_id]={title:m.title,year:m.year,poster:m.poster}; }
+    else { state.pf.watchlist = wl.filter(w=>w.tmdb_id!==m.tmdb_id); }
+  }
 }
 $("scCancel").onclick = closeSearch;
 $("scInput").addEventListener("input", () => { clearTimeout(scTimer); scTimer = setTimeout(runSearch, 350); });
