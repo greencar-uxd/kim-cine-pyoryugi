@@ -32,6 +32,10 @@
   .phead{text-align:center;padding:32px 0 24px}
   .avatar{width:88px;height:88px;border-radius:50%;background:#fff;border:1px solid var(--fog);
     display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px}
+  .avatar[role="button"]{cursor:pointer;transition:border-color .15s,transform .1s;position:relative}
+  .avatar[role="button"]:hover{border-color:var(--ink)}
+  .avatar[role="button"]:active{transform:scale(.97)}
+  .avatar[role="button"]::after{content:"✎";position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--screen);font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid var(--screen)}
   .nick{font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em}
   .joined{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--placeholder);margin-top:8px}
   .bio{font-size:14px;color:var(--caption);line-height:1.6;margin-top:12px}
@@ -884,7 +888,7 @@ function render(){
   const head = document.createElement("div"); head.className="phead";
   const joined = (me.created_at||"").slice(0,7).replace("-",".");
   head.innerHTML =
-    (me.avatar_url ? '<div class="avatar"><img src="'+esc(me.avatar_url)+'" alt=""></div>' : '<div class="avatar">'+ esc(me.emoji || "🐥") +'</div>') +
+    (me.avatar_url ? '<div class="avatar" id="myAvatar"><img src="'+esc(me.avatar_url)+'" alt=""></div>' : '<div class="avatar" id="myAvatar">'+ esc(me.emoji || "🐥") +'</div>') +
     '<div class="nick">'+ esc(me.nickname||"선원") +'</div>' +
     (joined? '<div class="joined">'+esc(joined)+' 승선</div>':'') +
     '<div class="bio'+(me.bio?'':' empty')+'">'+ (me.bio? esc(me.bio) : "자기소개가 아직 없어요.") +'</div>' +
@@ -894,6 +898,8 @@ function render(){
       '<div class="stat"><b>'+ (me.following||0) +'</b><span>팔로잉</span></div>' +
     '</div>';
   body.appendChild(head);
+  const _av = document.getElementById("myAvatar");
+  if(_av){ _av.setAttribute("role","button"); _av.title="프로필 사진 변경"; _av.onclick = openEdit; }
 
   // 최애 영화 (실제 포스터)
   const favIds = (pf.favorites||[]).map(f=>f.tmdb_id);
