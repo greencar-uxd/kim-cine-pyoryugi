@@ -1,0 +1,26 @@
+name = "kimcine-auth"
+main = "index.js"
+compatibility_date = "2026-07-21"
+account_id = "58296ecb75677f2c7d141d4dd9e75b06"
+workers_dev = true
+
+# D1 (SQLite) — 현재 대시보드 바인딩과 동일
+[[d1_databases]]
+binding = "DB"
+database_name = "kimcine-db"
+database_id = "c7d22f4f-5cf2-420c-8943-dc7f664b70bd"
+
+# 일반 텍스트 변수 (시크릿 RESEND_API_KEY·TMDB_TOKEN 은 대시보드에 유지되며 여기 넣지 않음)
+[vars]
+ADMIN_NICKS = "미니과니"
+SITE_ORIGIN = "https://kim-cine-pyoryugi.kr"
+FROM_EMAIL = "김씨네표류기 <hello@kim-cine-pyoryugi.kr>"
+
+# Cron — 만료 데이터 정리 (매일 18:00 UTC)
+[triggers]
+crons = ["0 18 * * *"]
+
+# 커스텀 도메인 — API 엔드포인트
+[[routes]]
+pattern = "api.kim-cine-pyoryugi.kr"
+custom_domain = true
